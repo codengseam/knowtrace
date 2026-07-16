@@ -1,0 +1,49 @@
+# 云脉·智诊伴学 · 项目配置
+
+project:
+  name: 云脉·智诊伴学
+  slug: knowtrace
+  slogan: 夸克解题，钉钉批改，云脉智诊——做乡村师生身边的AI认知教研员。
+
+mvp:
+  subject: 数学
+  grade: 七年级上册
+  textbook: 人教版
+  knowledge_point_count: 50
+
+# 知识图谱基座
+knowledge_graph:
+  dir: data/knowledge_graph
+  default_file: 七年级上册.json
+
+# 阿里云百炼平台配置（运行时从 .env 读取）
+bailian:
+  rag_app_id: ${DASHSCOPE_RAG_APP_ID}
+  api_key: ${DASHSCOPE_API_KEY}
+  embedding_model: text-embedding-v3
+
+# 模型分工
+models:
+  multimodal_recognition: qwen3-omni
+  reasoning: qwen3-max
+  edge_fallback: qwen3-1.5b  # 弱网降级
+  tts: funasr
+
+# 内容专栏
+content:
+  dir: content
+  default_column: 初中数学教研
+
+# 工程化资产（复用自 HaloRead）
+assets:
+  traefile: .trae
+  scripts: scripts
+  tests: tests
+  workflows: .github/workflows
+
+# CI 门禁
+ci:
+  gates:
+    - python scripts/check_book_structure.py --output content --strict
+    - pytest -q
+    - bash tests/run_regression_suite.sh

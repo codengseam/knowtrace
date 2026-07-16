@@ -1,0 +1,32 @@
+# 个人 AI 深度阅读助手 — Python 依赖
+
+# 核心依赖
+PyYAML>=6.0
+python-dotenv>=1.0.0
+
+# LLM / Agent 编排
+langchain>=0.3.0
+langchain-core>=0.1.0
+langchain-community>=0.0.20
+langchain-openai>=0.2.0
+langgraph>=0.2.0
+
+# Web 服务
+Flask>=3.0.0
+
+# 搜索能力（web_search.py 的 fallback 后端）
+duckduckgo-search>=7.0
+
+# PDF 本地解析（MCP 不可用时的 fallback）
+pypdf>=3.0
+pdfplumber>=0.11
+
+# 图片处理（生成圣贤堂头像缩略图）
+Pillow>=10.0
+
+# Markdown → HTML 渲染 + 净化（构建期为每篇笔记生成 SSG 静态页，BUG-035）
+markdown>=3.6
+bleach>=6.1
+
+# 开发 / 测试
+pytest>=8.0
