@@ -1,0 +1,780 @@
+{
+  "version": "1.0",
+  "subject": "数学",
+  "grade": "七年级上册",
+  "textbook": "人教版",
+  "generated_at": "2026-07-16",
+  "node_count": 50,
+  "nodes": [
+    {
+      "id": "K7A001",
+      "name": "正数与负数",
+      "chapter": "第1章 有理数",
+      "section": "1.1",
+      "difficulty": 1,
+      "prerequisites": [],
+      "error_types": [
+        "概念混淆：把负号当成减号运算",
+        "漏判0：不知道0既不是正数也不是负数",
+        "量纲理解：用正负表示相反意义的量时方向取反"
+      ],
+      "description": "用正负数表示相反意义的量，是引入负数的现实动机"
+    },
+    {
+      "id": "K7A002",
+      "name": "有理数及分类",
+      "chapter": "第1章 有理数",
+      "section": "1.1",
+      "difficulty": 1,
+      "prerequisites": ["K7A001"],
+      "error_types": [
+        "把0归到正数或负数",
+        "整数与自然数范围混淆",
+        "分数与小数重复分类导致遗漏"
+      ],
+      "description": "将有理数按整数/分数、正负分类，建立数系认知框架"
+    },
+    {
+      "id": "K7A003",
+      "name": "数轴",
+      "chapter": "第1章 有理数",
+      "section": "1.2",
+      "difficulty": 1,
+      "prerequisites": ["K7A002"],
+      "error_types": [
+        "数轴三要素不全：漏标原点、正方向或单位长度",
+        "单位长度不统一导致坐标错位",
+        "负数标在原点右侧"
+      ],
+      "description": "用原点、正方向、单位长度三要素构建数轴，使数可视化"
+    },
+    {
+      "id": "K7A004",
+      "name": "相反数",
+      "chapter": "第1章 有理数",
+      "section": "1.2",
+      "difficulty": 1,
+      "prerequisites": ["K7A003"],
+      "error_types": [
+        "误认为相反数就是负数",
+        "求相反数漏加括号，如-a的相反数写成a而非(-a)",
+        "0的相反数判断错误"
+      ],
+      "description": "借助数轴理解“只有符号不同的两个数”，建立符号运算基础"
+    },
+    {
+      "id": "K7A005",
+      "name": "绝对值",
+      "chapter": "第1章 有理数",
+      "section": "1.2",
+      "difficulty": 2,
+      "prerequisites": ["K7A004"],
+      "error_types": [
+        "绝对值内符号处理错误",
+        "误认为|a|=a恒成立",
+        "用绝对值比较大小时方向判断错误"
+      ],
+      "description": "用数轴上点到原点的距离定义绝对值，是后续比较与运算的核心工具"
+    },
+    {
+      "id": "K7A006",
+      "name": "有理数大小比较",
+      "chapter": "第1章 有理数",
+      "section": "1.2",
+      "difficulty": 2,
+      "prerequisites": ["K7A003", "K7A005"],
+      "error_types": [
+        "两个负数比较时忘记“绝对值大的反而小”",
+        "数轴上左小右大方向记反",
+        "分数通分错误导致比较结果错"
+      ],
+      "description": "借助数轴与绝对值比较有理数大小，建立“右大左小”直觉"
+    },
+    {
+      "id": "K7A007",
+      "name": "有理数加法及运算律",
+      "chapter": "第1章 有理数",
+      "section": "1.3",
+      "difficulty": 2,
+      "prerequisites": ["K7A005", "K7A003"],
+      "error_types": [
+        "同号异号法则混淆",
+        "加法交换律误用到减法",
+        "异号相加时和的符号判定错误"
+      ],
+      "description": "通过同号、异号法则与运算律掌握有理数加法"
+    },
+    {
+      "id": "K7A008",
+      "name": "有理数减法",
+      "chapter": "第1章 有理数",
+      "section": "1.3",
+      "difficulty": 2,
+      "prerequisites": ["K7A007", "K7A004"],
+      "error_types": [
+        "减法转加法时忘记变号",
+        "0减负数结果符号错",
+        "连续减号简化错误（如a-b-(-c)）"
+      ],
+      "description": "利用“减去一个数等于加上它的相反数”实现减法转化"
+    },
+    {
+      "id": "K7A009",
+      "name": "有理数加减混合运算",
+      "chapter": "第1章 有理数",
+      "section": "1.3",
+      "difficulty": 2,
+      "prerequisites": ["K7A008"],
+      "error_types": [
+        "省略加号后符号判定错乱",
+        "加法结合律使用时机错误",
+        "多步运算中途符号丢失"
+      ],
+      "description": "把加减混合运算统一为加法，提升多步运算准确率"
+    },
+    {
+      "id": "K7A010",
+      "name": "有理数乘法及运算律",
+      "chapter": "第1章 有理数",
+      "section": "1.4",
+      "difficulty": 2,
+      "prerequisites": ["K7A005"],
+      "error_types": [
+        "积的符号判定错误（奇负偶正）",
+        "乘法分配律漏乘某一项",
+        "因数含0时误判结果符号"
+      ],
+      "description": "通过“奇负偶正”法则与运算律掌握有理数乘法"
+    },
+    {
+      "id": "K7A011",
+      "name": "有理数除法",
+      "chapter": "第1章 有理数",
+      "section": "1.4",
+      "difficulty": 2,
+      "prerequisites": ["K7A010"],
+      "error_types": [
+        "除以一个数等于乘其倒数时漏变号",
+        "0作除数未识别",
+        "倒数与相反数混淆"
+      ],
+      "description": "把除法转化为乘以倒数，统一乘除运算规则"
+    },
+    {
+      "id": "K7A012",
+      "name": "有理数乘除混合运算",
+      "chapter": "第1章 有理数",
+      "section": "1.4",
+      "difficulty": 2,
+      "prerequisites": ["K7A010", "K7A011"],
+      "error_types": [
+        "乘除顺序混乱",
+        "转化为乘法时符号处理错",
+        "含0时未特判导致后续错"
+      ],
+      "description": "处理含乘除的混合表达式，强化符号与顺序控制"
+    },
+    {
+      "id": "K7A013",
+      "name": "有理数的乘方",
+      "chapter": "第1章 有理数",
+      "section": "1.5",
+      "difficulty": 2,
+      "prerequisites": ["K7A010"],
+      "error_types": [
+        "底数含负号时幂的符号判定错（如(-2)³与-2³）",
+        "把aⁿ误算为a×n",
+        "指数为0时结果判错（误认为0）"
+      ],
+      "description": "理解乘方是相同因数连乘的简便写法，区分底数符号"
+    },
+    {
+      "id": "K7A014",
+      "name": "科学记数法",
+      "chapter": "第1章 有理数",
+      "section": "1.5",
+      "difficulty": 2,
+      "prerequisites": ["K7A013"],
+      "error_types": [
+        "10的指数取错",
+        "a的范围(1≤|a|<10)控制不对",
+        "负数的科学记数法丢负号"
+      ],
+      "description": "用a×10ⁿ表示大数，是科学计算与单位换算的基础"
+    },
+    {
+      "id": "K7A015",
+      "name": "近似数与有效数字",
+      "chapter": "第1章 有理数",
+      "section": "1.5",
+      "difficulty": 2,
+      "prerequisites": ["K7A014"],
+      "error_types": [
+        "有效数字位数数错",
+        "精确度判断错误（精确到哪一位）",
+        "四舍五入时边界处理错"
+      ],
+      "description": "区分精确数与近似数，理解有效数字与精确度"
+    },
+    {
+      "id": "K7A016",
+      "name": "有理数混合运算综合",
+      "chapter": "第1章 有理数",
+      "section": "1.5",
+      "difficulty": 3,
+      "prerequisites": ["K7A009", "K7A012", "K7A013"],
+      "error_types": [
+        "运算顺序错误（先加减后乘除）",
+        "乘方优先级与负号冲突",
+        "多步运算中间符号丢失累积"
+      ],
+      "description": "综合运用加减乘除乘方及括号规则，是计算能力总成"
+    },
+    {
+      "id": "K7A017",
+      "name": "数轴上两点距离",
+      "chapter": "第1章 有理数",
+      "section": "1.2",
+      "difficulty": 2,
+      "prerequisites": ["K7A003", "K7A005"],
+      "error_types": [
+        "距离公式漏绝对值",
+        "两点位置关系判断错误",
+        "中点坐标计算错误"
+      ],
+      "description": "用|a-b|表示数轴上两点距离，连接几何与代数"
+    },
+    {
+      "id": "K7A018",
+      "name": "用字母表示数",
+      "chapter": "第2章 整式的加减",
+      "section": "2.1",
+      "difficulty": 1,
+      "prerequisites": ["K7A016"],
+      "error_types": [
+        "字母与数字相乘漏写乘号导致歧义",
+        "单位漏写或位置错",
+        "用字母表示数量关系时列式不全"
+      ],
+      "description": "用字母表示变化的量，从算术思维过渡到代数思维"
+    },
+    {
+      "id": "K7A019",
+      "name": "单项式",
+      "chapter": "第2章 整式的加减",
+      "section": "2.1",
+      "difficulty": 1,
+      "prerequisites": ["K7A018"],
+      "error_types": [
+        "系数与次数混淆",
+        "单独一个字母或数字是否算单项式判错",
+        "含π时把π当字母计入次数"
+      ],
+      "description": "认识数与字母乘积形式的单项式，建立系数与次数概念"
+    },
+    {
+      "id": "K7A020",
+      "name": "多项式",
+      "chapter": "第2章 整式的加减",
+      "section": "2.1",
+      "difficulty": 1,
+      "prerequisites": ["K7A019"],
+      "error_types": [
+        "项的符号判定错（应含符号）",
+        "多项式次数取错",
+        "常数项漏判"
+      ],
+      "description": "由单项式相加构成多项式，建立项、常数项、次数概念"
+    },
+    {
+      "id": "K7A021",
+      "name": "整式",
+      "chapter": "第2章 整式的加减",
+      "section": "2.1",
+      "difficulty": 1,
+      "prerequisites": ["K7A019", "K7A020"],
+      "error_types": [
+        "整式与分式分不清（分母含字母）",
+        "单项式与多项式分类错",
+        "把分母含字母的代数式当整式"
+      ],
+      "description": "把单项式与多项式统称为整式，形成代数式分类框架"
+    },
+    {
+      "id": "K7A022",
+      "name": "列代数式",
+      "chapter": "第2章 整式的加减",
+      "section": "2.1",
+      "difficulty": 2,
+      "prerequisites": ["K7A021"],
+      "error_types": [
+        "数量关系翻译错（如“a、b两数平方和”写成(a+b)²）",
+        "运算顺序未用括号体现",
+        "单位与代数式括号匹配错"
+      ],
+      "description": "把文字数量关系翻译成代数式，是列方程的前置能力"
+    },
+    {
+      "id": "K7A023",
+      "name": "同类项概念",
+      "chapter": "第2章 整式的加减",
+      "section": "2.2",
+      "difficulty": 1,
+      "prerequisites": ["K7A019"],
+      "error_types": [
+        "判定只看字母不看指数",
+        "把字母顺序不同当不同类",
+        "常数项不视为同类项"
+      ],
+      "description": "识别字母相同且相同字母指数也相同的同类项"
+    },
+    {
+      "id": "K7A024",
+      "name": "合并同类项",
+      "chapter": "第2章 整式的加减",
+      "section": "2.2",
+      "difficulty": 2,
+      "prerequisites": ["K7A023"],
+      "error_types": [
+        "系数相加时符号错",
+        "字母与指数部分漏写",
+        "不是同类项强行合并"
+      ],
+      "description": "把同类项系数相加、字母与指数不变，实现化简"
+    },
+    {
+      "id": "K7A025",
+      "name": "去括号",
+      "chapter": "第2章 整式的加减",
+      "section": "2.2",
+      "difficulty": 2,
+      "prerequisites": ["K7A021", "K7A008"],
+      "error_types": [
+        "括号前是负号时括号内各项未全变号",
+        "括号前有系数时漏乘某项",
+        "多层括号去括号顺序错误"
+      ],
+      "description": "利用分配律与变号规则去掉括号，是化简与解方程的核心步骤"
+    },
+    {
+      "id": "K7A026",
+      "name": "整式加减运算",
+      "chapter": "第2章 整式的加减",
+      "section": "2.2",
+      "difficulty": 3,
+      "prerequisites": ["K7A024", "K7A025"],
+      "error_types": [
+        "化简求值时未先化简直接代入",
+        "字母取值时未检验分母是否为0",
+        "化简过程中同类项漏合并"
+      ],
+      "description": "综合去括号与合并同类项完成整式加减化简求值"
+    },
+    {
+      "id": "K7A027",
+      "name": "方程与方程的解",
+      "chapter": "第3章 一元一次方程",
+      "section": "3.1",
+      "difficulty": 1,
+      "prerequisites": ["K7A022"],
+      "error_types": [
+        "方程与代数式不分",
+        "方程的解与解方程混淆",
+        "检验代入时符号错"
+      ],
+      "description": "建立方程与方程的解的概念，会检验解的正确性"
+    },
+    {
+      "id": "K7A028",
+      "name": "一元一次方程概念",
+      "chapter": "第3章 一元一次方程",
+      "section": "3.1",
+      "difficulty": 1,
+      "prerequisites": ["K7A027", "K7A026"],
+      "error_types": [
+        "未知数次数判定错（最高次≠1）",
+        "含未知数在分母的式子误判为一元一次",
+        "系数化为0后次数判错"
+      ],
+      "description": "判定一元一次方程的特征（一元、一次、整式）"
+    },
+    {
+      "id": "K7A029",
+      "name": "等式的性质",
+      "chapter": "第3章 一元一次方程",
+      "section": "3.1",
+      "difficulty": 2,
+      "prerequisites": ["K7A028"],
+      "error_types": [
+        "性质2除以同一个数时除数为0",
+        "等式两边运算不对称",
+        "移项与等式性质对应不清"
+      ],
+      "description": "利用等式性质实现等式变形，是解方程的理论依据"
+    },
+    {
+      "id": "K7A030",
+      "name": "合并同类项与移项解方程",
+      "chapter": "第3章 一元一次方程",
+      "section": "3.2",
+      "difficulty": 2,
+      "prerequisites": ["K7A029", "K7A024"],
+      "error_types": [
+        "移项未变号",
+        "系数化为1时除法变号",
+        "同类项合并错误"
+      ],
+      "description": "用合并同类项与移项解简单一元一次方程"
+    },
+    {
+      "id": "K7A031",
+      "name": "去括号解一元一次方程",
+      "chapter": "第3章 一元一次方程",
+      "section": "3.2",
+      "difficulty": 2,
+      "prerequisites": ["K7A030", "K7A025"],
+      "error_types": [
+        "括号前负号未全变号",
+        "分配律漏乘",
+        "去括号与移项顺序错乱"
+      ],
+      "description": "含括号方程先去括号再求解，强化分配律应用"
+    },
+    {
+      "id": "K7A032",
+      "name": "去分母解一元一次方程",
+      "chapter": "第3章 一元一次方程",
+      "section": "3.2",
+      "difficulty": 3,
+      "prerequisites": ["K7A031", "K7A011"],
+      "error_types": [
+        "漏乘不含分母的项",
+        "分子是多项式时未加括号",
+        "约分错误"
+      ],
+      "description": "含分母方程先去分母再求解，统一为整式方程"
+    },
+    {
+      "id": "K7A033",
+      "name": "行程问题应用",
+      "chapter": "第3章 一元一次方程",
+      "section": "3.3",
+      "difficulty": 3,
+      "prerequisites": ["K7A032"],
+      "error_types": [
+        "相遇/追及情境判断错",
+        "速度时间路程公式套用错",
+        "单位不统一（千米/小时与米/秒）"
+      ],
+      "description": "用一元一次方程解决相遇、追及等行程问题"
+    },
+    {
+      "id": "K7A034",
+      "name": "工程问题应用",
+      "chapter": "第3章 一元一次方程",
+      "section": "3.3",
+      "difficulty": 3,
+      "prerequisites": ["K7A032"],
+      "error_types": [
+        "工作总量未设为1",
+        "合作与单独工作效率相加错",
+        "时间与效率对应错"
+      ],
+      "description": "用一元一次方程解决工程合作与效率问题"
+    },
+    {
+      "id": "K7A035",
+      "name": "利润与打折问题应用",
+      "chapter": "第3章 一元一次方程",
+      "section": "3.3",
+      "difficulty": 3,
+      "prerequisites": ["K7A032"],
+      "error_types": [
+        "利润率公式记错（成本/售价混淆）",
+        "打折后价格与原价关系错",
+        "进价、售价、标价三量混淆"
+      ],
+      "description": "用一元一次方程解决利润率、打折等销售问题"
+    },
+    {
+      "id": "K7A036",
+      "name": "分配与配套问题应用",
+      "chapter": "第3章 一元一次方程",
+      "section": "3.3",
+      "difficulty": 3,
+      "prerequisites": ["K7A032"],
+      "error_types": [
+        "等量关系列错",
+        "配套比例换算错",
+        "单位“件/人”换算错"
+      ],
+      "description": "用一元一次方程解决分配与配套问题"
+    },
+    {
+      "id": "K7A037",
+      "name": "立体图形与平面图形",
+      "chapter": "第4章 几何图形初步",
+      "section": "4.1",
+      "difficulty": 1,
+      "prerequisites": [],
+      "error_types": [
+        "立体与平面图形分类错",
+        "几何体面数数错",
+        "把曲面图形归到平面图形"
+      ],
+      "description": "区分立体图形与平面图形，建立几何直观"
+    },
+    {
+      "id": "K7A038",
+      "name": "展开图与三视图",
+      "chapter": "第4章 几何图形初步",
+      "section": "4.1",
+      "difficulty": 2,
+      "prerequisites": ["K7A037"],
+      "error_types": [
+        "展开图折叠成立体图形判断错",
+        "三视图对应关系错",
+        "看不见的棱漏画"
+      ],
+      "description": "通过展开图与三视图建立立体与平面的对应"
+    },
+    {
+      "id": "K7A039",
+      "name": "几何体表面积与体积",
+      "chapter": "第4章 几何图形初步",
+      "section": "4.1",
+      "difficulty": 2,
+      "prerequisites": ["K7A037", "K7A013"],
+      "error_types": [
+        "表面积漏算某些面",
+        "体积与表面积公式混用",
+        "单位换算错（cm³与mL）"
+      ],
+      "description": "计算常见几何体的表面积与体积"
+    },
+    {
+      "id": "K7A040",
+      "name": "点、线、面、体",
+      "chapter": "第4章 几何图形初步",
+      "section": "4.1",
+      "difficulty": 1,
+      "prerequisites": ["K7A037"],
+      "error_types": [
+        "点动成线与线动成面对应错",
+        "几何体由面围成判断错",
+        "棱与顶点关系错"
+      ],
+      "description": "理解点线面体的相互生成关系"
+    },
+    {
+      "id": "K7A041",
+      "name": "直线、射线、线段",
+      "chapter": "第4章 几何图形初步",
+      "section": "4.2",
+      "difficulty": 1,
+      "prerequisites": ["K7A040"],
+      "error_types": [
+        "直线射线线段端点数判错",
+        "表示方法（两字母顺序）写反",
+        "延伸方向判断错"
+      ],
+      "description": "区分直线、射线、线段的端点与延伸特征"
+    },
+    {
+      "id": "K7A042",
+      "name": "线段的比较与运算",
+      "chapter": "第4章 几何图形初步",
+      "section": "4.2",
+      "difficulty": 2,
+      "prerequisites": ["K7A041", "K7A005"],
+      "error_types": [
+        "线段长短比较方法错",
+        "线段和差作图错",
+        "中点与三等分点混淆"
+      ],
+      "description": "比较线段长短，进行线段和差运算"
+    },
+    {
+      "id": "K7A043",
+      "name": "线段中点",
+      "chapter": "第4章 几何图形初步",
+      "section": "4.2",
+      "difficulty": 2,
+      "prerequisites": ["K7A042"],
+      "error_types": [
+        "中点定义中“相等”与“两倍”对应错",
+        "已知中点求总长时漏乘2",
+        "多线段共线时中点判定错"
+      ],
+      "description": "利用中点定义进行线段长度计算"
+    },
+    {
+      "id": "K7A044",
+      "name": "角的概念与表示",
+      "chapter": "第4章 几何图形初步",
+      "section": "4.3",
+      "difficulty": 1,
+      "prerequisites": ["K7A041"],
+      "error_types": [
+        "角的顶点与边判断错",
+        "三字母表示时顶点位置写错",
+        "角与角的度数概念混淆"
+      ],
+      "description": "建立角的概念，掌握角的四种表示方法"
+    },
+    {
+      "id": "K7A045",
+      "name": "角的度量（度分秒）",
+      "chapter": "第4章 几何图形初步",
+      "section": "4.3",
+      "difficulty": 2,
+      "prerequisites": ["K7A044"],
+      "error_types": [
+        "度分秒60进制换算错",
+        "量角器读数时内外圈选错",
+        "角的始边终边判断错"
+      ],
+      "description": "用度分秒进行角的度量与换算"
+    },
+    {
+      "id": "K7A046",
+      "name": "角的比较与运算",
+      "chapter": "第4章 几何图形初步",
+      "section": "4.3",
+      "difficulty": 2,
+      "prerequisites": ["K7A045", "K7A009"],
+      "error_types": [
+        "角的和差计算中单位错（度分秒未统一）",
+        "角度大小比较方向错",
+        "借助三角板拼角范围判错"
+      ],
+      "description": "进行角的比较与和差运算"
+    },
+    {
+      "id": "K7A047",
+      "name": "角平分线",
+      "chapter": "第4章 几何图形初步",
+      "section": "4.3",
+      "difficulty": 2,
+      "prerequisites": ["K7A046"],
+      "error_types": [
+        "角平分线定义中比例对应错",
+        "已知半角求整角漏乘2",
+        "多角共顶点时平分线判定错"
+      ],
+      "description": "利用角平分线定义进行角度计算"
+    },
+    {
+      "id": "K7A048",
+      "name": "余角与补角",
+      "chapter": "第4章 几何图形初步",
+      "section": "4.3",
+      "difficulty": 2,
+      "prerequisites": ["K7A046"],
+      "error_types": [
+        "余角补角定义混淆",
+        "同角等角的余补相等进行等量代换错",
+        "90°与180°基准用错"
+      ],
+      "description": "理解余角与补角，掌握同角等角的余补相等"
+    },
+    {
+      "id": "K7A049",
+      "name": "方位角与方向角",
+      "chapter": "第4章 几何图形初步",
+      "section": "4.3",
+      "difficulty": 2,
+      "prerequisites": ["K7A048"],
+      "error_types": [
+        "方位角基准方向错（南北起算）",
+        "偏东偏西方向判断反",
+        "象限角与方位角换算错"
+      ],
+      "description": "用方位角与方向角描述位置关系"
+    },
+    {
+      "id": "K7A050",
+      "name": "一元一次方程应用综合",
+      "chapter": "第3章 一元一次方程",
+      "section": "3.3",
+      "difficulty": 3,
+      "prerequisites": ["K7A033", "K7A034", "K7A035", "K7A036"],
+      "error_types": [
+        "题型识别错导致列错方程",
+        "多步骤应用题等量关系找错",
+        "答案合理性检验缺失"
+      ],
+      "description": "综合应用一元一次方程解决各类实际问题"
+    }
+  ],
+  "edges": [
+    {"from": "K7A001", "to": "K7A002", "relation": "prerequisite"},
+    {"from": "K7A002", "to": "K7A003", "relation": "prerequisite"},
+    {"from": "K7A003", "to": "K7A004", "relation": "prerequisite"},
+    {"from": "K7A004", "to": "K7A005", "relation": "prerequisite"},
+    {"from": "K7A003", "to": "K7A006", "relation": "prerequisite"},
+    {"from": "K7A005", "to": "K7A006", "relation": "prerequisite"},
+    {"from": "K7A005", "to": "K7A007", "relation": "prerequisite"},
+    {"from": "K7A003", "to": "K7A007", "relation": "prerequisite"},
+    {"from": "K7A007", "to": "K7A008", "relation": "prerequisite"},
+    {"from": "K7A004", "to": "K7A008", "relation": "prerequisite"},
+    {"from": "K7A008", "to": "K7A009", "relation": "prerequisite"},
+    {"from": "K7A005", "to": "K7A010", "relation": "prerequisite"},
+    {"from": "K7A010", "to": "K7A011", "relation": "prerequisite"},
+    {"from": "K7A010", "to": "K7A012", "relation": "prerequisite"},
+    {"from": "K7A011", "to": "K7A012", "relation": "prerequisite"},
+    {"from": "K7A010", "to": "K7A013", "relation": "prerequisite"},
+    {"from": "K7A013", "to": "K7A014", "relation": "prerequisite"},
+    {"from": "K7A014", "to": "K7A015", "relation": "prerequisite"},
+    {"from": "K7A009", "to": "K7A016", "relation": "prerequisite"},
+    {"from": "K7A012", "to": "K7A016", "relation": "prerequisite"},
+    {"from": "K7A013", "to": "K7A016", "relation": "prerequisite"},
+    {"from": "K7A003", "to": "K7A017", "relation": "prerequisite"},
+    {"from": "K7A005", "to": "K7A017", "relation": "prerequisite"},
+    {"from": "K7A016", "to": "K7A018", "relation": "prerequisite"},
+    {"from": "K7A018", "to": "K7A019", "relation": "prerequisite"},
+    {"from": "K7A019", "to": "K7A020", "relation": "prerequisite"},
+    {"from": "K7A019", "to": "K7A021", "relation": "prerequisite"},
+    {"from": "K7A020", "to": "K7A021", "relation": "prerequisite"},
+    {"from": "K7A021", "to": "K7A022", "relation": "prerequisite"},
+    {"from": "K7A019", "to": "K7A023", "relation": "prerequisite"},
+    {"from": "K7A023", "to": "K7A024", "relation": "prerequisite"},
+    {"from": "K7A021", "to": "K7A025", "relation": "prerequisite"},
+    {"from": "K7A008", "to": "K7A025", "relation": "prerequisite"},
+    {"from": "K7A024", "to": "K7A026", "relation": "prerequisite"},
+    {"from": "K7A025", "to": "K7A026", "relation": "prerequisite"},
+    {"from": "K7A022", "to": "K7A027", "relation": "prerequisite"},
+    {"from": "K7A027", "to": "K7A028", "relation": "prerequisite"},
+    {"from": "K7A026", "to": "K7A028", "relation": "prerequisite"},
+    {"from": "K7A028", "to": "K7A029", "relation": "prerequisite"},
+    {"from": "K7A029", "to": "K7A030", "relation": "prerequisite"},
+    {"from": "K7A024", "to": "K7A030", "relation": "prerequisite"},
+    {"from": "K7A030", "to": "K7A031", "relation": "prerequisite"},
+    {"from": "K7A025", "to": "K7A031", "relation": "prerequisite"},
+    {"from": "K7A031", "to": "K7A032", "relation": "prerequisite"},
+    {"from": "K7A011", "to": "K7A032", "relation": "prerequisite"},
+    {"from": "K7A032", "to": "K7A033", "relation": "prerequisite"},
+    {"from": "K7A032", "to": "K7A034", "relation": "prerequisite"},
+    {"from": "K7A032", "to": "K7A035", "relation": "prerequisite"},
+    {"from": "K7A032", "to": "K7A036", "relation": "prerequisite"},
+    {"from": "K7A037", "to": "K7A038", "relation": "prerequisite"},
+    {"from": "K7A037", "to": "K7A039", "relation": "prerequisite"},
+    {"from": "K7A013", "to": "K7A039", "relation": "prerequisite"},
+    {"from": "K7A037", "to": "K7A040", "relation": "prerequisite"},
+    {"from": "K7A040", "to": "K7A041", "relation": "prerequisite"},
+    {"from": "K7A041", "to": "K7A042", "relation": "prerequisite"},
+    {"from": "K7A005", "to": "K7A042", "relation": "prerequisite"},
+    {"from": "K7A042", "to": "K7A043", "relation": "prerequisite"},
+    {"from": "K7A041", "to": "K7A044", "relation": "prerequisite"},
+    {"from": "K7A044", "to": "K7A045", "relation": "prerequisite"},
+    {"from": "K7A045", "to": "K7A046", "relation": "prerequisite"},
+    {"from": "K7A009", "to": "K7A046", "relation": "prerequisite"},
+    {"from": "K7A046", "to": "K7A047", "relation": "prerequisite"},
+    {"from": "K7A046", "to": "K7A048", "relation": "prerequisite"},
+    {"from": "K7A048", "to": "K7A049", "relation": "prerequisite"},
+    {"from": "K7A033", "to": "K7A050", "relation": "prerequisite"},
+    {"from": "K7A034", "to": "K7A050", "relation": "prerequisite"},
+    {"from": "K7A035", "to": "K7A050", "relation": "prerequisite"},
+    {"from": "K7A036", "to": "K7A050", "relation": "prerequisite"}
+  ]
+}

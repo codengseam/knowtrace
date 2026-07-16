@@ -9,7 +9,10 @@ __pycache__/
 .idea/
 
 .cache/
-data/
+# data/ 目录下的知识图谱基座与 Prompt 模板是核心资产，必须入库
+# 仅忽略运行时生成的缓存与原始数据
+data/cache/
+data/raw/
 
 # Node 依赖（测试时本地安装，不提交）
 node_modules/
