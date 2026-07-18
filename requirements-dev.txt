@@ -1,0 +1,10 @@
+# 云脉·智诊伴学 — 开发期可选依赖
+# 用于路径 B（LangGraph 真并行评审），Phase 0 不需要、魔搭 Studio 不会安装
+# 本地启用：pip install -r requirements-dev.txt
+
+# LLM / Agent 编排（路径 B langgraph 真并行，scripts/review_plan.py）
+langchain>=0.3.0
+langchain-core>=0.1.0
+langchain-community>=0.0.20
+langchain-openai>=0.2.0
+langgraph>=0.2.0

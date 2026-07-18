@@ -193,7 +193,11 @@ def build_ui() -> gr.Blocks:
 
 
 # 模块加载时初始化数据库
-init_store()
+# 用 try/except 包住，避免魔搭 Studio 容器只读挂载时 import 失败导致页面白屏
+try:
+    init_store()
+except Exception as exc:  # noqa: BLE001
+    print(f"[app.py] init_store 失败，魔搭 Studio 入口仍可加载（仅持久化不可用）：{exc}")
 
 demo = build_ui()
 

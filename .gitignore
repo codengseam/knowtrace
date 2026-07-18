@@ -10,9 +10,14 @@ __pycache__/
 
 .cache/
 # data/ 目录下的知识图谱基座与 Prompt 模板是核心资产，必须入库
-# 仅忽略运行时生成的缓存与原始数据
+# 仅忽略运行时生成的缓存与原始数据，以及 src/server/ 写入的运行时产物
 data/cache/
 data/raw/
+data/wrongbook.db
+data/wrongbook_md/
+data/exam_output/
+data/voice_output/
+data/question_bank/
 
 # Node 依赖（测试时本地安装，不提交）
 node_modules/

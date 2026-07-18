@@ -41,11 +41,12 @@ def generate_voice_report(
         weak_points=diagnosis.weak_points,
     )
 
-    # Phase 3 TODO: 调用 FunASR TTS 生成音频
+    # Phase 3 TODO: 调用 FunASR TTS 生成音频（当前 Phase 0 仅写 txt 文字稿）
     audio_id = f"V{uuid.uuid4().hex[:8]}"
-    audio_path = VOICE_OUTPUT_DIR / f"{audio_id}.mp3"
+    audio_path = VOICE_OUTPUT_DIR / f"{audio_id}.txt"
     audio_path.write_text(
-        f"[Phase 3 待实现] 语音周报 {audio_id}\n{text_content}",
+        f"[Phase 0 占位] 语音周报 {audio_id}\n{text_content}\n"
+        f"Phase 3 将用 FunASR 生成 MP3 音频\n",
         encoding="utf-8",
     )
 

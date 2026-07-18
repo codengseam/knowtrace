@@ -1,15 +1,9 @@
 # 云脉·智诊伴学 — Python 依赖
+# 魔搭 ModelScope Studio 入口（app.py）只需以下依赖即可启动
 
 # 核心依赖
 PyYAML>=6.0
 python-dotenv>=1.0.0
-
-# LLM / Agent 编排
-langchain>=0.3.0
-langchain-core>=0.1.0
-langchain-community>=0.0.20
-langchain-openai>=0.2.0
-langgraph>=0.2.0
 
 # Web 服务（魔搭 Studio 入口）
 gradio>=4.44.0,<5.0.0
@@ -17,7 +11,7 @@ gradio>=4.44.0,<5.0.0
 # 阿里云百炼 / Qwen3 / FunASR
 dashscope>=1.20.0
 
-# 一键出卷（A4 Word 排版）
+# 一键出卷（A4 Word 排版，Phase 2 启用）
 python-docx>=1.1.0
 
 # 数据契约 / 校验

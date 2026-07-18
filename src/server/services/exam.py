@@ -40,10 +40,12 @@ def generate_paper(
     for kp in knowledge_points:
         problems.extend(retriever.retrieve(kp, difficulty=difficulty, top_k=count))
 
-    # Phase 2 TODO: 用 python-docx 生成真实 A4 Word
-    docx_path = OUTPUT_DIR / f"{paper_id}.docx"
+    # Phase 2 TODO: 用 python-docx 生成真实 A4 Word（当前 Phase 0 仅写 txt 占位）
+    docx_path = OUTPUT_DIR / f"{paper_id}.txt"
     docx_path.write_text(
-        f"[Phase 2 待实现] 试卷 {paper_id}\n知识点: {knowledge_points}\n难度: {difficulty}\n题数: {len(problems)}\n",
+        f"[Phase 0 占位] 试卷 {paper_id}\n"
+        f"知识点: {knowledge_points}\n难度: {difficulty}\n题数: {len(problems)}\n"
+        f"Phase 2 将用 python-docx 生成 A4 Word 排版\n",
         encoding="utf-8",
     )
 

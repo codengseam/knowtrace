@@ -43,6 +43,12 @@ collect_ignore = [
     "test_plan_review_skill.py",
     # 依赖 site/css/style.css（HaloRead 静态前端资产，knowtrace 改用根目录 app.py 入口）
     "test_build_site.py",
+    # 依赖 src.core.workflow / src.core.plan_review_workflow（HaloRead 专属），
+    # 当前靠 pytest.importorskip("langgraph") 间接跳过，但 requirements-dev.txt
+    # 装 langgraph 后会收集期崩溃，故显式加入 collect_ignore
+    "test_workflow.py",
+    "test_workflow_e2e.py",
+    "test_plan_review.py",
 ]
 
 
