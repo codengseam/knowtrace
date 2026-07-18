@@ -25,8 +25,8 @@
 - [ ] 未破坏 `prompts/` 下 7 份讲书提示词
 - [ ] 未破坏 `src/utils/quality.py` 的检测逻辑
 - [ ] 若修改了 `.trae/skills/deep-reading/rules.md`，已运行 `python scripts/sync_rules.py` 同步到 `RULES.md`
-- [ ] 提交前已运行 `python scripts/check_duplicates.py`，`output/` 目录无重复 Markdown 文件
-- [ ] `output/` 下章节名与文件名无「模块N」前缀（由 `check_book_structure.py --strict` 自动拦截，历史问题 BUG-019）
+- [ ] 提交前已运行 `python scripts/check_duplicates.py`，`content/` 目录无重复 Markdown 文件
+- [ ] `content/` 下章节名与文件名无「模块N」前缀（由 `check_book_structure.py --strict` 自动拦截，历史问题 BUG-019）
 - [ ] 算法专栏新增章节已按 [plan.md §九 章型分化模板](../../docs/algorithm-column/plan.md) 选型（算法/数据结构/方法论/迁移四型 6 要素变体 + §9.4 AI 感词禁用清单）
 
 ## 三、测试
@@ -34,11 +34,11 @@
 - [ ] 新功能有对应的单元测试
 - [ ] 修改现有逻辑后，相关测试已更新
 - [ ] 运行 `pytest` 全部通过（或明确说明跳过原因）
-- [ ] 运行 `python scripts/check_book_structure.py --output output --strict`，P0/P1/P2 全部清零（合并前必须完成）
+- [ ] 运行 `python scripts/check_book_structure.py --output content --strict`，P0/P1/P2 全部清零（合并前必须完成）
 - [ ] 运行 `python scripts/check_missing_columns.py --strict`，无专栏失踪（合并前必须完成，防止 agent 分支覆盖 master 已有专栏，BUG-050）
 - [ ] 运行 `python -m pytest tests/test_category_mapping.py -q`，无专栏落入 other 黑洞（新增专栏必须补 DISPLAY_CATEGORY_MAP 映射，BUG-051）
 - [ ] 边界场景有覆盖：空输入、超长输入、非法路径、并发等
-- [ ] Mock 模式（`DEEP_READING_MOCK=1`）下端到端流程能跑通
+- [ ] Mock 模式（`LLM_MOCK=1`）下端到端流程能跑通
 - [ ] 修复了会复发的代码/数据 bug 时，已补充回归测试并按 `.trae/rules/bug-reporting.md` 更新 `tests/bug_regression_list.md`
 - [ ] 移动端阅读器改动已验收：不调用 `Fullscreen API` / `screen.orientation.lock`，代码块优先 `pre-wrap` 自动换行
 - [ ] push 前已运行 `python scripts/validate_commit_messages.py origin/master..HEAD`，提交标题与正文均为中文且准确概括当前修改

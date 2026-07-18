@@ -85,7 +85,7 @@
 2. 若已有相关测试，更新断言以覆盖修复后的行为。
 3. 涉及移动端交互时，优先在 `tests/run_regression_suite.sh` 中增加脚本级断言（如「不调用 XXX API」）。
 4. 修复完成后执行完整测试集：
-   - `python scripts/check_book_structure.py --output output --strict`
+   - `python scripts/check_book_structure.py --output content --strict`
    - `pytest -q`
    - `bash tests/run_regression_suite.sh`
    - 浏览器/模拟器/真机验收（移动端 bug 必须）

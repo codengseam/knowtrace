@@ -5,11 +5,20 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from ..store import insert_wrong_problem, list_wrong_problems, DB_PATH
 
 MD_BACKUP_DIR = DB_PATH.parent / "wrongbook_md"
+
+# 文件名 sanitize：仅允许字母数字下划线连字符，其余替换为下划线
+_SANITIZE_RE = re.compile(r"[^\w\-]", re.UNICODE)
+
+
+def _sanitize_filename(value: str) -> str:
+    """把字符串 sanitize 成文件名安全形式"""
+    return _SANITIZE_RE.sub("_", value)
 
 
 def submit_wrong_problem(
@@ -60,10 +69,15 @@ def _write_md_backup(
     problem_text: str,
     error_type: str | None,
 ) -> Path:
-    """写 MD 备份文件（人可读，Git 友好）"""
+    """写 MD 备份文件（人可读，Git 友好）
+
+    文件名 sanitize：student_id 和 knowledge_point_id 都做安全处理，
+    防止 ../ 或特殊字符导致异常路径（Phase 0 评审 R11 修复）。
+    """
     MD_BACKUP_DIR.mkdir(parents=True, exist_ok=True)
-    safe_student = student_id.replace("/", "_")
-    md_path = MD_BACKUP_DIR / safe_student / f"{problem_id:06d}_{knowledge_point_id}.md"
+    safe_student = _sanitize_filename(student_id)
+    safe_kp = _sanitize_filename(knowledge_point_id)
+    md_path = MD_BACKUP_DIR / safe_student / f"{problem_id:06d}_{safe_kp}.md"
     md_path.parent.mkdir(parents=True, exist_ok=True)
     content = f"""# 错题 #{problem_id}
 

@@ -9,12 +9,19 @@ Phase 1 完善 MD 备份导出与重建索引。
 
 from __future__ import annotations
 
+import os
 import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator
 
-DB_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "wrongbook.db"
+# DB_PATH 优先读环境变量（便于单元测试用 tmp_path 注入），否则用项目默认路径
+_DEFAULT_DB_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "wrongbook.db"
+DB_PATH = Path(os.environ.get("KNOWTRACE_DB_PATH", str(_DEFAULT_DB_PATH)))
+
+# WAL 模式 + 30s busy timeout，避免多用户并发录入时 database is locked
+# （Phase 0 评审 P1 R4 修复）
+_BUSY_TIMEOUT_SEC = 30
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS wrong_problems (
@@ -59,18 +66,36 @@ CREATE TABLE IF NOT EXISTS exam_papers (
 """
 
 
-def init_db(db_path: Path = DB_PATH) -> None:
-    """初始化数据库与表结构（幂等）"""
+def init_db(db_path: Path | None = None) -> None:
+    """初始化数据库与表结构（幂等）
+
+    启用 WAL 模式提升并发读写；若容器只读挂载导致 PRAGMA 失败，降级为默认模式不阻断。
+    注意：默认参数不直接绑 DB_PATH，而是在调用时读取模块级变量，
+    避免 monkeypatch store.DB_PATH 后默认参数仍指向旧值（Python 默认参数陷阱）。
+    """
+    if db_path is None:
+        db_path = DB_PATH
     db_path.parent.mkdir(parents=True, exist_ok=True)
-    with sqlite3.connect(db_path) as conn:
+    with sqlite3.connect(db_path, timeout=_BUSY_TIMEOUT_SEC) as conn:
+        try:
+            conn.execute("PRAGMA journal_mode=WAL")
+        except sqlite3.OperationalError:
+            # 容器只读挂载时 PRAGMA 可能失败，降级为默认 journal_mode 不阻断
+            pass
         conn.executescript(_SCHEMA)
         conn.commit()
 
 
 @contextmanager
-def get_conn(db_path: Path = DB_PATH) -> Iterator[sqlite3.Connection]:
-    """获取 SQLite 连接（上下文管理器，自动 commit/rollback）"""
-    conn = sqlite3.connect(db_path)
+def get_conn(db_path: Path | None = None) -> Iterator[sqlite3.Connection]:
+    """获取 SQLite 连接（上下文管理器，自动 commit/rollback）
+
+    设置 30s busy timeout，避免多用户并发时立即抛 database is locked。
+    注意：默认参数不直接绑 DB_PATH，调用时读取模块级变量（避免默认参数陷阱）。
+    """
+    if db_path is None:
+        db_path = DB_PATH
+    conn = sqlite3.connect(db_path, timeout=_BUSY_TIMEOUT_SEC)
     conn.row_factory = sqlite3.Row
     try:
         yield conn
@@ -92,7 +117,7 @@ def insert_wrong_problem(
     source: str = "manual",
     grade: str = "七年级上册",
     subject: str = "数学",
-    db_path: Path = DB_PATH,
+    db_path: Path | None = None,
 ) -> int:
     """插入一条错题，返回自增 id"""
     with get_conn(db_path) as conn:
@@ -114,7 +139,7 @@ def insert_wrong_problem(
 def list_wrong_problems(
     student_id: str | None = None,
     limit: int = 100,
-    db_path: Path = DB_PATH,
+    db_path: Path | None = None,
 ) -> list[dict]:
     """列出错题（可按学生过滤）"""
     with get_conn(db_path) as conn:

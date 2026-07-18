@@ -1,5 +1,7 @@
 """公共测试 fixture。"""
+import os
 import tempfile
+from pathlib import Path
 
 import pytest
 
@@ -8,7 +10,7 @@ import pytest
 # output/ 目录 / 资治通鉴书籍 / scripts/review_plan.py / scripts/check_missing_columns.py
 # 等 knowtrace 未迁移的 HaloRead 专属模块或资产，import 即失败或断言不成立。
 # knowtrace 自有测试（test_branch_governance / test_check_chapter_order /
-# test_check_loop_log / test_regen_loop_log_index / test_web_reader[已 skip]）
+# test_check_loop_log / test_regen_loop_log_index / test_server_* / test_web_reader[已 skip]）
 # 不在此列，仍正常跑。
 collect_ignore = [
     # 依赖 src.core / src.agents / src.utils.prompts / src.utils.editor 等 HaloRead 专属模块
@@ -52,41 +54,39 @@ collect_ignore = [
 ]
 
 
-@pytest.fixture(autouse=True)
-def mock_env(monkeypatch):
-    """启用 Mock 模式，无需 API Key，并将日志重定向到临时目录。"""
-    monkeypatch.setenv("DEEP_READING_MOCK", "1")
+@pytest.fixture
+def isolated_db(tmp_path, monkeypatch):
+    """src/server 单元测试专用：注入独立 SQLite 路径，避免污染 /workspace/data/wrongbook.db。
 
+    用法：在测试函数签名加 `isolated_db` 参数即可，fixture 会自动：
+    1. 创建 tmp_path/wrongbook.db
+    2. monkeypatch KNOWTRACE_DB_PATH 环境变量
+    3. 同步重置 store.DB_PATH / wrongbook.MD_BACKUP_DIR / api.GRAPH_PATH 等模块常量
+    4. 调用 init_db() 初始化表结构
+    """
+    db_path = tmp_path / "wrongbook.db"
+    monkeypatch.setenv("KNOWTRACE_DB_PATH", str(db_path))
+    # 同步重置 store 模块的 DB_PATH 常量（模块加载时已读旧值）
+    import src.server.store as store
+    monkeypatch.setattr(store, "DB_PATH", db_path)
+    # 同步重置 wrongbook 的 MD_BACKUP_DIR（派生自 DB_PATH.parent）
+    import src.server.services.wrongbook as wrongbook
+    monkeypatch.setattr(wrongbook, "MD_BACKUP_DIR", db_path.parent / "wrongbook_md")
+    # 初始化表结构
+    store.init_db(db_path)
+    yield db_path
+
+
+@pytest.fixture(autouse=True)
+def _mock_llm_env(monkeypatch):
+    """启用 LLM Mock 模式，无需 API Key。
+
+    与 .env.example 的 LLM_MOCK= 对齐（Phase 0 评审 P1 R7：原 conftest 用
+    DEEP_READING_MOCK 是 HaloRead 沿袭死变量，knowtrace 用 LLM_MOCK）。
+    autouse=True 但只设置环境变量，不影响测试逻辑。
+    """
+    monkeypatch.setenv("LLM_MOCK", "1")
     # 将日志目录重定向到临时目录，避免污染真实 logs/
     tmpdir = tempfile.mkdtemp()
-
-    def fake_load_config():
-        return {
-            "output_dir": "output",
-            "logs": {"base_dir": tmpdir},
-            "quality_check": {
-                "required_sections": [
-                    "讲事情",
-                    "讲人物",
-                    "讲背景",
-                    "讲道理",
-                    "问道悟道",
-                    "结语",
-                ],
-            },
-            # 阶段3：section_templates 与 quality_check.required_sections 同步
-            "section_templates": {
-                "narrative": [
-                    "讲事情", "讲人物", "讲背景", "讲道理", "问道悟道", "结语",
-                ],
-                "modern": ["入戏", "破题", "方法论", "避坑", "践行"],
-                "knowledge": ["概念", "原理", "实践", "速查/自测"],
-            },
-        }
-
-    try:
-        import src.core.workflow  # noqa: F401
-        monkeypatch.setattr("src.core.workflow.load_config", fake_load_config)
-    except ImportError:
-        pass  # 环境缺少 langgraph 等依赖时，不阻塞无需 workflow 的测试
+    monkeypatch.setenv("LOG_DIR", tmpdir)
     yield

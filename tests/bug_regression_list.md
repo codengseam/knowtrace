@@ -1097,4 +1097,46 @@
   2. 硬编码映射表是脆弱点，必须有测试保证「所有使用的键都有映射」
   3. `check_missing_columns.py` 管「git 层专栏在不在」，`test_category_mapping.py` 管「展示层专栏显不显示」，两者互补
 
+## knowtrace Phase 0 架构基线（魔搭入口 + HaloRead 沿袭清理）
+
+- **编号**：BUG-052
+- **首次出现**：2026-07-18
+- **类型**：构建 / 兼容性
+- **现象**：魔搭 ModelScope Studio 上 knowtrace 项目页面所有按钮不能点；同时仓库残留 HaloRead 静态前端沿袭（`src/web/static-site/` / `scripts/build_site.py._copy_static_assets` / `tests/run_regression_suite.sh` 的 app.js 语法/沉浸模式/HTTP 冒烟步骤）拖累 CI，19 + 7 个 HaloRead 沿袭测试 import 即失败。
+- **根因**：
+  1. 魔搭 Studio 默认查找根目录 `app.py`，仓库无 `app.py` 导致 iframe 加载空白应用，所有按钮自然失效
+  2. HaloRead 静态前端资产 `src/web/static-site/` 与 knowtrace 改用 Gradio 入口的定位不匹配，但相关测试与脚本仍残留依赖
+  3. HaloRead 沿袭测试依赖 `src.core`/`src.agents`/`output/` 目录/资治通鉴书籍/`scripts/check_missing_columns.py` 等 knowtrace 未迁移模块，原有 `pytest.importorskip("langgraph")` 间接跳过策略在 `requirements-dev.txt` 装 langgraph 后会收集期崩溃
+  4. 50 章教研 md frontmatter.book 残留「重庆」前缀，与项目面向乡村师生定位不符
+- **修复**：
+  1. 新建根目录 `app.py`（Gradio Blocks + 6 Tab），`init_store()` 包 try/except 避免容器只读白屏
+  2. 新建 `src/server/` 四层架构（API/Service/Store/Retriever）+ `src/utils/` HaloRead 沿袭兼容层
+  3. `tests/conftest.py` 扩展 `collect_ignore` 至 28 项，分 6 类注释跳过依据
+  4. `tests/run_regression_suite.sh` 修正 `--output output` → `--output content`，启用路径 B 占位断言
+  5. `scripts/build_site.py` / `tests/test_build_site.py` 删除 `_copy_static_assets` 沿袭，4 个 HaloRead 沿袭测试加 `@pytest.mark.skip`
+  6. `.github/workflows/regression.yml` 修正 `--output output` → `--output content`
+  7. `.gitignore` 追加 `data/wrongbook.db` / `data/exam_output/` 等 src/server 运行时数据
+  8. `requirements.txt` 拆分：核心依赖 + `requirements-dev.txt`（langchain/langgraph 系列挪出）
+  9. `services/exam.py` / `services/voice.py` 假扩展名 `.docx` / `.mp3` 改 `.txt` 避免评委下载打不开
+  10. 50 章教研 md frontmatter.book 批量去「重庆」前缀
+- **涉及文件**：
+  - `app.py`（新建）/ `src/server/` 全套（新建）/ `src/utils/`（新建）
+  - `scripts/review_plan.py`（新建，路径 B 占位）/ `scripts/build_site.py`（修改）
+  - `requirements.txt` + `requirements-dev.txt` / `.env.example` / `config.yaml` / `.gitignore`
+  - `.github/workflows/regression.yml`
+  - `tests/conftest.py` / `tests/run_regression_suite.sh` / `tests/test_build_site.py`
+  - `docs/loop_log.md`（新建主文件骨架）/ `docs/loop_log/2026-07.md`（追加沉淀）
+  - `content/初中数学教研/数学教研01~50_*.md`（50 个文件 frontmatter.book 去重庆前缀）
+- **回归测试**：
+  - `tests/conftest.py::collect_ignore`（28 项跳过清单，含 6 类跳过依据注释）
+  - `tests/run_regression_suite.sh` [3/9] `check_book_structure.py --output content --strict`
+  - `tests/run_regression_suite.sh` [8/9] `review_plan.py` 路径 B 占位断言
+  - 本地三件套：`check_book_structure --strict` 0 问题 / `pytest` 37 通过 11 跳过 / `run_regression_suite.sh` 22 通过 0 失败
+- **教训/沉淀**：
+  1. 魔搭 Studio 入口约定（根目录 `app.py`）必须最先满足，否则页面白屏所有按钮失效——这是部署平台层面的硬约束，与代码质量无关
+  2. HaloRead 沿袭测试清理必须扩展 `collect_ignore` 显式跳过，不能依赖 `importorskip` 间接跳过（langgraph 已装但 `src.core` 不存在时会收集期崩溃）
+  3. Phase 0 占位 service 的文件扩展名必须与实际内容匹配（占位写 txt，Phase X 真实实现时再换 docx/mp3）
+  4. `.gitignore` 必须显式忽略 `src/server/` 写入的运行时数据（跨项目资产迁移时 `data/` 语义会变）
+  5. `requirements.txt` 与 `requirements-dev.txt` 分离让魔搭 CI 冷启动从 1-2 分钟降到 30 秒内（魔搭入口 `app.py` 不 import 的库都不应在 `requirements.txt`）
+
 

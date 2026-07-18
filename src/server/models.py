@@ -28,15 +28,39 @@ class WrongProblem(BaseModel):
     created_at: Optional[datetime] = None
 
 
+class NodeRisk(BaseModel):
+    """单个知识点的诊断风险评级"""
+
+    knowledge_point_id: str = Field(..., description="知识点 ID")
+    name: str = Field(default="", description="知识点名称")
+    chapter: str = Field(default="", description="所属章节")
+    error_count: int = Field(default=0, description="该知识点错题数")
+    error_types: list[str] = Field(default_factory=list, description="错因类型聚合")
+    risk_level: Literal["red", "yellow", "green", "gray"] = Field(
+        default="gray",
+        description="风险等级：red=直接薄弱（≥4 道）/ yellow=前置薄弱（2-3 道）/"
+        " green=已掌握（≤1 道）/ gray=未做题",
+    )
+    risk_reason: str = Field(default="", description="风险评级理由（人可读）")
+
+
 class DiagnosisResult(BaseModel):
-    """认知诊断结果"""
+    """认知诊断结果
+
+    Phase 1: 规则引擎版（四色风险等级 + 错因聚合 + 前置深度溯源）
+    Phase 1.5: 切换到 Qwen3-Max，schema 保持不变，只换 diagnose_student 内部实现
+    """
 
     student_id: str
-    weak_points: list[str] = Field(default_factory=list, description="薄弱知识点 ID 列表")
+    weak_points: list[str] = Field(default_factory=list, description="薄弱知识点 ID 列表（red+yellow）")
     root_causes: list[str] = Field(default_factory=list, description="溯源到的前置依赖薄弱点")
-    recommendation_path: list[str] = Field(default_factory=list, description="推荐补漏路径")
+    recommendation_path: list[str] = Field(default_factory=list, description="推荐补漏路径（先补前置，再补薄弱）")
     summary: str = Field(default="", description="一句话诊断摘要")
-    raw_llm_output: Optional[str] = Field(default=None, description="LLM 原始输出，便于调试")
+    node_risks: list[NodeRisk] = Field(
+        default_factory=list,
+        description="全部已诊断知识点的风险评级（含 red/yellow/green/gray 四色）",
+    )
+    raw_llm_output: Optional[str] = Field(default=None, description="LLM 原始输出，便于调试（Phase 1.5 启用）")
 
 
 class ExamPaper(BaseModel):

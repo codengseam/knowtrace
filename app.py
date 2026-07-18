@@ -57,7 +57,11 @@ def build_ui() -> gr.Blocks:
             gr.Markdown(get_project_info())
 
         with gr.Tab("📝 错题录入"):
-            gr.Markdown("### 录入错题到 SQLite + MD 备份\n支持文本输入，Phase 1 将补 MD 上传与图片录入")
+            gr.Markdown(
+                "### 录入错题到 SQLite + MD 备份\n"
+                "支持文本输入；Phase 1 已支持学生 ID / 知识点 ID 安全 sanitize；"
+                "Phase 1.5 将补 MD 上传与图片录入"
+            )
             with gr.Row():
                 student_id_wb = gr.Textbox(
                     label="学生 ID", placeholder="如 S001", value="S001"
@@ -77,8 +81,28 @@ def build_ui() -> gr.Blocks:
                 error_type_wb = gr.Textbox(label="错因", placeholder="如 概念混淆")
                 student_answer_wb = gr.Textbox(label="学生作答", placeholder="如 B")
                 correct_answer_wb = gr.Textbox(label="正确答案", placeholder="如 D")
-            submit_btn_wb = gr.Button("📝 提交错题", variant="primary")
+            with gr.Row():
+                fill_example_btn_wb = gr.Button("📝 填入示例题面", size="sm")
+                submit_btn_wb = gr.Button("📝 提交错题", variant="primary")
             output_wb = gr.Markdown(label="录入结果")
+
+            # 示例填充：一键填入真实错题，方便演示
+            # （K7A008 有理数减法：典型错因"减法变号错误"）
+            fill_example_btn_wb.click(
+                fn=lambda: (
+                    "计算 -5 - (-3) = ?",
+                    "减法变号错误",
+                    "-2",
+                    "-8",
+                ),
+                inputs=[],
+                outputs=[problem_text_wb, error_type_wb, student_answer_wb, correct_answer_wb],
+            )
+            # 知识点同步切到 K7A008（有理数减法），让示例链路完整
+            kp_choice_wb.value = next(
+                (kp for kp in knowledge_points if kp.startswith("K7A008")),
+                knowledge_points[0] if knowledge_points else None,
+            )
 
             submit_btn_wb.click(
                 fn=handle_wrongbook_submit,
@@ -89,7 +113,10 @@ def build_ui() -> gr.Blocks:
                 outputs=output_wb,
             )
 
-            gr.Markdown("---\n### 错题列表查询")
+            gr.Markdown(
+                "---\n### 错题列表查询\n"
+                "> 演示提示：连续录入 4 次同一知识点后，前往「认知诊断」Tab 可看到 🔴 red 评级 + 前置溯源"
+            )
             query_student_wb = gr.Textbox(label="学生 ID（留空查全部）", value="")
             query_btn_wb = gr.Button("🔍 查询错题")
             query_output_wb = gr.Markdown(label="错题列表")
@@ -102,8 +129,11 @@ def build_ui() -> gr.Blocks:
         with gr.Tab("🧠 认知诊断"):
             gr.Markdown(
                 "### 基于知识图谱 + Qwen3-Max 的认知诊断\n"
-                "Phase 0：规则引擎兜底（按错题数 TOP3 + 图谱查前置依赖）\n"
-                "Phase 1：接入 Qwen3-Max 做语义级 LCA 溯源"
+                "**Phase 1 已上线**：规则引擎版（四色风险等级 + 错因聚合 + 前置深度溯源）\n"
+                "- 🔴 red 直接薄弱（错 ≥4 道）｜ 🟡 yellow 前置薄弱（2-3 道）\n"
+                "- 🟢 green 已掌握（≤1 道）｜ ⚪ gray 未做题\n"
+                "- 递归查 2 层 prerequisites 溯源根因，生成「先补前置 → 再补薄弱」补漏路径\n\n"
+                "Phase 1.5：接入 Qwen3-Max 做语义级 LCA 溯源（schema 不变）"
             )
             student_id_diag = gr.Textbox(
                 label="学生 ID", placeholder="如 S001", value="S001"

@@ -134,19 +134,60 @@ def get_wrongbook_list(student_id: str) -> str:
 
 
 def handle_diagnosis_run(student_id: str) -> str:
-    """认知诊断按钮事件"""
+    """认知诊断按钮事件（Phase 1 升级：四色风险等级 + 前置深度溯源）"""
     if not student_id:
         return "⚠️ 请填写学生 ID"
     result = diagnose_student(student_id=student_id)
+
+    if not result.node_risks:
+        return f"## 认知诊断报告 · 学生 {student_id}\n\n{result.summary}"
+
+    # 四色标记（emoji + 文字）
+    RISK_BADGE = {
+        "red": "🔴 red 直接薄弱",
+        "yellow": "🟡 yellow 前置薄弱",
+        "green": "🟢 green 已掌握",
+        "gray": "⚪ gray 未做题",
+    }
+
     lines = [
         f"## 认知诊断报告 · 学生 {student_id}\n",
         f"**摘要**: {result.summary}\n",
-        f"**薄弱知识点 TOP3**: {', '.join(result.weak_points) or '无'}",
-        f"**溯源前置薄弱点**: {', '.join(result.root_causes) or '无'}",
-        f"**推荐补漏路径**:",
+        "### 知识点风险评级（四色）\n",
+        "| 等级 | 知识点 | 章节 | 错题数 | 错因类型 | 评级理由 |",
+        "|---|---|---|---|---|---|",
     ]
-    for step in result.recommendation_path:
-        lines.append(f"  - {step}")
+    # 按风险等级排序：red → yellow → green → gray
+    risk_order = {"red": 0, "yellow": 1, "green": 2, "gray": 3}
+    sorted_risks = sorted(
+        result.node_risks,
+        key=lambda r: (risk_order.get(r.risk_level, 99), -r.error_count),
+    )
+    for r in sorted_risks:
+        error_types_str = ", ".join(r.error_types) if r.error_types else "-"
+        lines.append(
+            f"| {RISK_BADGE.get(r.risk_level, r.risk_level)} | "
+            f"{r.knowledge_point_id} · {r.name} | {r.chapter} | "
+            f"{r.error_count} | {error_types_str} | {r.risk_reason} |"
+        )
+
+    lines.append(f"\n### 溯源前置薄弱点（递归查 2 层）")
+    if result.root_causes:
+        lines.append(", ".join(result.root_causes))
+    else:
+        lines.append("无（薄弱知识点无前置依赖或前置已在薄弱列表中）")
+
+    lines.append(f"\n### 推荐补漏路径（先补前置，再补薄弱）")
+    if result.recommendation_path:
+        for step in result.recommendation_path:
+            lines.append(f"  - {step}")
+    else:
+        lines.append("  - 无（学生掌握良好，建议保持）")
+
+    lines.append(
+        "\n> Phase 1 规则引擎诊断（四色风险等级 + 错因聚合 + 前置深度溯源）；"
+        "Phase 1.5 将接入 Qwen3-Max 做语义级 LCA 溯源。"
+    )
     return "\n".join(lines)
 
 
