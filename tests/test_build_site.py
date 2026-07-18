@@ -412,6 +412,7 @@ def test_stats_includes_categories():
         assert data["stats"]["categories"] == 1
 
 
+@pytest.mark.skip(reason="HaloRead 沿袭测试，knowtrace 已改用根目录 app.py 入口，src/web/static-site/ 不再存在")
 def test_build_site_copies_static_assets():
     """构建时从 src/web/static-site/ 同步 html/css/js/sw 到 site/。"""
     with tempfile.TemporaryDirectory() as tmp:
@@ -426,6 +427,7 @@ def test_build_site_copies_static_assets():
         assert (site_dir / "sw.js").exists()
 
 
+@pytest.mark.skip(reason="HaloRead 沿袭测试，knowtrace 已改用根目录 app.py 入口，src/web/static-site/ 不再存在")
 def test_build_site_static_assets_match_source():
     """site/ 下的静态产物与 src/web/static-site/ 源文件一致。"""
     with tempfile.TemporaryDirectory() as tmp:
@@ -447,6 +449,7 @@ def test_build_site_static_assets_match_source():
         ).read_text(encoding="utf-8")
 
 
+@pytest.mark.skip(reason="HaloRead 沿袭测试，knowtrace 已改用根目录 app.py 入口，src/web/static-site/ 不再存在")
 def test_build_site_index_html_has_reader_features():
     """index.html 包含阅读增强功能所需 DOM 元素。"""
     with tempfile.TemporaryDirectory() as tmp:
@@ -463,6 +466,7 @@ def test_build_site_index_html_has_reader_features():
         assert 'class="reader-wallpaper"' in html
 
 
+@pytest.mark.skip(reason="HaloRead 沿袭测试，knowtrace 已改用根目录 app.py 入口，src/web/static-site/ 不再存在")
 def test_build_site_app_js_has_reader_features():
     """app.js 包含自动阅读、沉浸模式、壁纸切换相关函数。"""
     with tempfile.TemporaryDirectory() as tmp:

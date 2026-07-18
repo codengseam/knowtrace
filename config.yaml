@@ -41,6 +41,20 @@ assets:
   tests: tests
   workflows: .github/workflows
 
+# 魔搭 ModelScope Studio 入口
+app:
+  entry: app.py
+  framework: gradio
+  server_port: 8080
+
+# 错题与出卷存储
+storage:
+  sqlite: data/wrongbook.db
+  md_backup: data/wrongbook_md
+  exam_output: data/exam_output
+  voice_output: data/voice_output
+  question_bank: data/question_bank
+
 # CI 门禁
 ci:
   gates:

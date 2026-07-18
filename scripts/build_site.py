@@ -284,59 +284,9 @@ def _ensure_sage_portrait_thumbnails(images_dir: Path, max_width: int = 400) -> 
             print(f"[build_site] 生成缩略图失败 {img_path.name}: {exc}", file=sys.stderr)
 
 
-def _copy_static_assets(site_path: Path) -> None:
-    """将 src/web/static-site/ 下的前端产物复制到 site/。
-
-    避免 site/ 下的 html/css/js 靠手动维护而与源文件不同步，
-    导致 GitHub Pages 部署后出现功能缺失。
-    """
-    root = Path(__file__).resolve().parent.parent
-    source_dir = root / "src" / "web" / "static-site"
-    if not source_dir.exists():
-        return
-
-    assets = [
-        ("index.html", site_path / "index.html"),
-        ("gaokao.html", site_path / "gaokao.html"),
-        ("css/style.css", site_path / "css" / "style.css"),
-        ("js/app.js", site_path / "js" / "app.js"),
-        ("js/vendor/marked.min.js", site_path / "js" / "vendor" / "marked.min.js"),
-        ("js/vendor/jszip.min.js", site_path / "js" / "vendor" / "jszip.min.js"),
-        ("sw.js", site_path / "sw.js"),
-    ]
-
-    # 复制圣贤堂展厅页到 site/demos/（独立演示页，不依赖主站 SPA）
-    demos_dir = root / "demos"
-    if demos_dir.exists():
-        saints_src = demos_dir / "saints_hall.html"
-        if saints_src.exists():
-            saints_dest = site_path / "demos" / "saints_hall.html"
-            saints_dest.parent.mkdir(parents=True, exist_ok=True)
-            # 源文件在 demos/，使用 ../site/index.html 可在本地直接打开；
-            # 复制到 site/demos/ 后需回退到 site 根目录，故重写为 ../index.html。
-            html = saints_src.read_text(encoding="utf-8")
-            html = html.replace("../site/index.html?", "../index.html?")
-            saints_dest.write_text(html, encoding="utf-8")
-        # 复制本地缓存的头像图片到 site/demos/images/
-        images_src = demos_dir / "images"
-        if images_src.exists():
-            images_dest = site_path / "demos" / "images"
-            images_dest.mkdir(parents=True, exist_ok=True)
-            _ensure_sage_portrait_thumbnails(images_src)
-            for img in images_src.glob("*.jpg"):
-                shutil.copy2(img, images_dest / img.name)
-            thumbs_src = images_src / "thumbs"
-            if thumbs_src.exists():
-                thumbs_dest = images_dest / "thumbs"
-                thumbs_dest.mkdir(parents=True, exist_ok=True)
-                for thumb in thumbs_src.glob("*.jpg"):
-                    shutil.copy2(thumb, thumbs_dest / thumb.name)
-    for src_rel, dest in assets:
-        src = source_dir / Path(src_rel)
-        if not src.exists():
-            continue
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(src, dest)
+# HaloRead 沿袭：knowtrace 入口已改为根目录 app.py（Gradio），
+# 不再需要从 src/web/static-site/ 复制前端静态资产到 site/。
+# 原 _copy_static_assets() 函数已删除，避免回归测试被不存在的目录牵制。
 
 
 # ============ BUG-035: SSG 章节静态页 ============
@@ -716,8 +666,7 @@ def build_site(output_dir: str = "output", site_dir: str = "site") -> Path:
     data_dir.mkdir(parents=True, exist_ok=True)
     notes_dir.mkdir(parents=True, exist_ok=True)
 
-    # 同步前端静态资源（html/css/js/sw），避免手动维护导致 GitHub Pages 版本滞后
-    _copy_static_assets(site_path)
+    # HaloRead 沿袭：knowtrace 入口已改为根目录 app.py，不再需要 src/web/static-site/ 静态资产复制
 
     # 清空 notes 目录，保证幂等（处理笔记删除场景）
     for child in notes_dir.iterdir():

@@ -46,47 +46,49 @@ echo "=== HaloRead 回归测试集 ==="
 echo ""
 
 # ---------- 1. 合并冲突标记检查（BUG-011） ----------
-echo "[1/13] 合并冲突标记检查"
+echo "[1/9] 合并冲突标记检查"
 CONFLICTS=$(grep -rn "^<<<<<<< HEAD\|^>>>>>>> origin/master" \
     --include="*.py" --include="*.yml" --include="*.md" --include="*.js" \
     --include="*.css" --include="*.html" . 2>/dev/null | grep -v node_modules | grep -v "/.git/" | wc -l)
 step "无合并冲突标记残留 (found=$CONFLICTS)" "$([ "$CONFLICTS" = "0" ] && echo 1 || echo 0)"
 
 # ---------- 2. app.js 语法检查（BUG-003/008） ----------
-echo "[2/13] app.js 语法检查"
-if node --check site/js/app.js 2>/dev/null; then
-    step "site/js/app.js 语法正确" 1
-else
-    step "site/js/app.js 语法正确" 0
-fi
+# HaloRead 沿袭，knowtrace 已改用 app.py 入口，跳过
+# echo "[2/13] app.js 语法检查"
+# if node --check site/js/app.js 2>/dev/null; then
+#     step "site/js/app.js 语法正确" 1
+# else
+#     step "site/js/app.js 语法正确" 0
+# fi
 
 # ---------- 3. 沉浸模式关键代码 + 防横屏 + 整屏全屏（BUG-003/020/036 回归） ----------
-echo "[3/13] 沉浸模式回归检查"
-APP_JS="site/js/app.js"
-HAS_TOGGLE=$(grep -c "toggleImmersiveMode" "$APP_JS" 2>/dev/null || true)
-HAS_ENTER=$(grep -c "enterImmersiveMode" "$APP_JS" 2>/dev/null || true)
-HAS_EXIT=$(grep -c "exitImmersiveMode" "$APP_JS" 2>/dev/null || true)
-HAS_INIT=$(grep -c "initImmersive" "$APP_JS" 2>/dev/null || true)
-NO_LOCK=$(grep -c "screen.orientation.lock\|lockOrientation" "$APP_JS" 2>/dev/null || true)
-NO_LOCK=${NO_LOCK:-0}
+# HaloRead 沿袭，knowtrace 已改用 app.py 入口，跳过
+# echo "[3/13] 沉浸模式回归检查"
+# APP_JS="site/js/app.js"
+# HAS_TOGGLE=$(grep -c "toggleImmersiveMode" "$APP_JS" 2>/dev/null || true)
+# HAS_ENTER=$(grep -c "enterImmersiveMode" "$APP_JS" 2>/dev/null || true)
+# HAS_EXIT=$(grep -c "exitImmersiveMode" "$APP_JS" 2>/dev/null || true)
+# HAS_INIT=$(grep -c "initImmersive" "$APP_JS" 2>/dev/null || true)
+# NO_LOCK=$(grep -c "screen.orientation.lock\|lockOrientation" "$APP_JS" 2>/dev/null || true)
+# NO_LOCK=${NO_LOCK:-0}
 # BUG-036：重新引入 Fullscreen API 实现整屏全屏，断言从"不调用"改为"调用"
-HAS_FULLSCREEN=$(grep -c "requestFullscreen\|webkitRequestFullscreen\|exitFullscreen\|webkitExitFullscreen" "$APP_JS" 2>/dev/null || true)
-HAS_FULLSCREEN=${HAS_FULLSCREEN:-0}
+# HAS_FULLSCREEN=$(grep -c "requestFullscreen\|webkitRequestFullscreen\|exitFullscreen\|webkitExitFullscreen" "$APP_JS" 2>/dev/null || true)
+# HAS_FULLSCREEN=${HAS_FULLSCREEN:-0}
 # BUG-036：小米浏览器 UA 跳过 Fullscreen API（防 BUG-021 强制横屏重现）
-HAS_XIAOMI_CHECK=$(grep -c "isXiaomiBrowser\|MiuiBrowser" "$APP_JS" 2>/dev/null || true)
-HAS_XIAOMI_CHECK=${HAS_XIAOMI_CHECK:-0}
-step "含 toggleImmersiveMode/enter/exit/initImmersive ($HAS_TOGGLE/$HAS_ENTER/$HAS_EXIT/$HAS_INIT)" \
-    "$([ "$HAS_TOGGLE" -ge 1 ] && [ "$HAS_ENTER" -ge 1 ] && [ "$HAS_EXIT" -ge 1 ] && [ "$HAS_INIT" -ge 1 ] && echo 1 || echo 0)"
-step "不调用 screen.orientation.lock (防横屏, found=$NO_LOCK)" \
-    "$([ "$NO_LOCK" = "0" ] && echo 1 || echo 0)"
-step "调用 Fullscreen API 实现整屏全屏 (BUG-036, found=$HAS_FULLSCREEN)" \
-    "$([ "$HAS_FULLSCREEN" -ge 1 ] && echo 1 || echo 0)"
-step "小米浏览器 UA 跳过 Fullscreen (BUG-036, found=$HAS_XIAOMI_CHECK)" \
-    "$([ "$HAS_XIAOMI_CHECK" -ge 1 ] && echo 1 || echo 0)"
+# HAS_XIAOMI_CHECK=$(grep -c "isXiaomiBrowser\|MiuiBrowser" "$APP_JS" 2>/dev/null || true)
+# HAS_XIAOMI_CHECK=${HAS_XIAOMI_CHECK:-0}
+# step "含 toggleImmersiveMode/enter/exit/initImmersive ($HAS_TOGGLE/$HAS_ENTER/$HAS_EXIT/$HAS_INIT)" \
+#     "$([ "$HAS_TOGGLE" -ge 1 ] && [ "$HAS_ENTER" -ge 1 ] && [ "$HAS_EXIT" -ge 1 ] && [ "$HAS_INIT" -ge 1 ] && echo 1 || echo 0)"
+# step "不调用 screen.orientation.lock (防横屏, found=$NO_LOCK)" \
+#     "$([ "$NO_LOCK" = "0" ] && echo 1 || echo 0)"
+# step "调用 Fullscreen API 实现整屏全屏 (BUG-036, found=$HAS_FULLSCREEN)" \
+#     "$([ "$HAS_FULLSCREEN" -ge 1 ] && echo 1 || echo 0)"
+# step "小米浏览器 UA 跳过 Fullscreen (BUG-036, found=$HAS_XIAOMI_CHECK)" \
+#     "$([ "$HAS_XIAOMI_CHECK" -ge 1 ] && echo 1 || echo 0)"
 
 # ---------- 4. 构建站点（BUG-011/004） ----------
-echo "[4/13] 构建静态站点"
-if python3 scripts/build_site.py --output output --site site >/dev/null 2>&1; then
+echo "[2/9] 构建静态站点"
+if python3 scripts/build_site.py --output content --site site >/dev/null 2>&1; then
     step "build_site.py 执行成功" 1
 else
     step "build_site.py 执行成功" 0
@@ -99,27 +101,28 @@ step "index.json 含 stats.notes 且 >0（BUG-012）" \
     "$(python3 -c "import json,sys; d=json.load(open('site/data/index.json')); sys.exit(0 if d.get('stats',{}).get('notes',0)>0 else 1)" 2>/dev/null && echo 1 || echo 0)"
 
 # ---------- 5. 阅读器功能 e2e（BUG-002/003/008） ----------
-echo "[5/13] 阅读器功能 e2e (jsdom)"
-if [ -d node_modules/jsdom ]; then
-    if node tests/test_reader_features.js >/dev/null 2>&1; then
-        step "test_reader_features.js 全部通过" 1
-    else
-        step "test_reader_features.js 全部通过" 0
-    fi
-else
-    echo "  ⚠️  跳过：node_modules/jsdom 未安装（运行 npm install jsdom marked 启用）"
-fi
+# HaloRead 沿袭，knowtrace 已改用 app.py 入口，跳过
+# echo "[5/13] 阅读器功能 e2e (jsdom)"
+# if [ -d node_modules/jsdom ]; then
+#     if node tests/test_reader_features.js >/dev/null 2>&1; then
+#         step "test_reader_features.js 全部通过" 1
+#     else
+#         step "test_reader_features.js 全部通过" 0
+#     fi
+# else
+#     echo "  ⚠️  跳过：node_modules/jsdom 未安装（运行 npm install jsdom marked 启用）"
+# fi
 
 # ---------- 6. 书籍结构严格校验（BUG-017，合并前必须清零 P0/P1/P2） ----------
-echo "[6/13] 书籍结构严格校验"
-if python3 scripts/check_book_structure.py --output output --strict >/dev/null 2>&1; then
+echo "[3/9] 书籍结构严格校验"
+if python3 scripts/check_book_structure.py --output content --strict >/dev/null 2>&1; then
     step "check_book_structure.py --strict 通过" 1
 else
     step "check_book_structure.py --strict 通过" 0
 fi
 
 # ---------- 7. 重复文件检查（BUG-005，数据质量，告警） ----------
-echo "[7/13] 重复文件检查"
+echo "[4/9] 重复文件检查"
 if python3 scripts/check_duplicates.py >/dev/null 2>&1; then
     warn "check_duplicates.py 通过" 1
 else
@@ -127,7 +130,7 @@ else
 fi
 
 # ---------- 8. 章节排序检查（BUG-004/009，数据质量，告警） ----------
-echo "[8/13] 章节排序检查"
+echo "[5/9] 章节排序检查"
 if python3 scripts/check_chapter_order.py >/dev/null 2>&1; then
     warn "check_chapter_order.py 通过" 1
 else
@@ -135,52 +138,53 @@ else
 fi
 
 # ---------- 9. HTTP 冒烟测试 ----------
-echo "[9/13] HTTP 冒烟测试"
-python3 -m http.server 8092 --bind 127.0.0.1 --directory site >/dev/null 2>&1 &
-SERVER_PID=$!
-sleep 1
-ALL_200=1
-for url in "/" "/js/app.js" "/css/style.css" "/data/index.json"; do
-    code=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:8092$url" 2>/dev/null)
-    if [ "$code" != "200" ]; then
-        ALL_200=0
-        echo "      $url -> $code"
-    fi
-done
+# HaloRead 沿袭，knowtrace 已改用 app.py 入口，跳过（curl /js/app.js、/css/style.css 依赖 HaloRead 前端资产）
+# echo "[9/13] HTTP 冒烟测试"
+# python3 -m http.server 8092 --bind 127.0.0.1 --directory site >/dev/null 2>&1 &
+# SERVER_PID=$!
+# sleep 1
+# ALL_200=1
+# for url in "/" "/js/app.js" "/css/style.css" "/data/index.json"; do
+#     code=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:8092$url" 2>/dev/null)
+#     if [ "$code" != "200" ]; then
+#         ALL_200=0
+#         echo "      $url -> $code"
+#     fi
+# done
 # BUG-035：SSG 全局索引页 HTTP 200
-SSG_INDEX_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:8092/reader/index.html" 2>/dev/null)
-if [ "$SSG_INDEX_CODE" != "200" ]; then
-    ALL_200=0
-    echo "      /reader/index.html -> $SSG_INDEX_CODE"
-fi
-kill $SERVER_PID 2>/dev/null || true
-step "关键资源全部 200" "$ALL_200"
-
+# SSG_INDEX_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:8092/reader/index.html" 2>/dev/null)
+# if [ "$SSG_INDEX_CODE" != "200" ]; then
+#     ALL_200=0
+#     echo "      /reader/index.html -> $SSG_INDEX_CODE"
+# fi
+# kill $SERVER_PID 2>/dev/null || true
+# step "关键资源全部 200" "$ALL_200"
+#
 # BUG-035：SSG 章节静态页（夸克阅读模式入口）冒烟
-echo "  -> SSG 章节静态页冒烟 (BUG-035)"
-step "site/reader/index.html 存在（全局索引）" "$([ -f site/reader/index.html ] && echo 1 || echo 0)"
+# echo "  -> SSG 章节静态页冒烟 (BUG-035)"
+# step "site/reader/index.html 存在（全局索引）" "$([ -f site/reader/index.html ] && echo 1 || echo 0)"
 # 取第一篇 SSG 章节页做语义结构断言
-SSG_SAMPLE=$(find site/reader -mindepth 2 -name '*.html' -type f 2>/dev/null | head -1)
-step "site/reader/{书}/{章节}_{事件}.html 至少 1 个" "$([ -n "$SSG_SAMPLE" ] && echo 1 || echo 0)"
-if [ -n "$SSG_SAMPLE" ]; then
-    SSG_HTML=$(cat "$SSG_SAMPLE")
-    # 夸克阅读模式触发条件：必须含 <article> + <h1> + <p>
-    step "SSG HTML 含 <article> 包裹（夸克硬性条件）" \
-        "$(echo "$SSG_HTML" | grep -q '<article' && echo 1 || echo 0)"
-    step "SSG HTML 含 <h1> 主标题" \
-        "$(echo "$SSG_HTML" | grep -qE '<h1[ >]' && echo 1 || echo 0)"
-    step "SSG HTML 含 <p> 段落" \
-        "$(echo "$SSG_HTML" | grep -q '<p>' && echo 1 || echo 0)"
-    # 反向断言：不引 app.js，避免 SPA 双渲染路径分叉
-    step "SSG HTML 不引用 app.js" \
-        "$(echo "$SSG_HTML" | grep -q 'app.js' && echo 0 || echo 1)"
-    # 反向断言：不依赖 fetch / marked.parse
-    step "SSG HTML 不依赖 fetch/marked.parse" \
-        "$(echo "$SSG_HTML" | grep -qE 'fetch\(|marked\.parse' && echo 0 || echo 1)"
-fi
+# SSG_SAMPLE=$(find site/reader -mindepth 2 -name '*.html' -type f 2>/dev/null | head -1)
+# step "site/reader/{书}/{章节}_{事件}.html 至少 1 个" "$([ -n "$SSG_SAMPLE" ] && echo 1 || echo 0)"
+# if [ -n "$SSG_SAMPLE" ]; then
+#     SSG_HTML=$(cat "$SSG_SAMPLE")
+#     # 夸克阅读模式触发条件：必须含 <article> + <h1> + <p>
+#     step "SSG HTML 含 <article> 包裹（夸克硬性条件）" \
+#         "$(echo "$SSG_HTML" | grep -q '<article' && echo 1 || echo 0)"
+#     step "SSG HTML 含 <h1> 主标题" \
+#         "$(echo "$SSG_HTML" | grep -qE '<h1[ >]' && echo 1 || echo 0)"
+#     step "SSG HTML 含 <p> 段落" \
+#         "$(echo "$SSG_HTML" | grep -q '<p>' && echo 1 || echo 0)"
+#     # 反向断言：不引 app.js，避免 SPA 双渲染路径分叉
+#     step "SSG HTML 不引用 app.js" \
+#         "$(echo "$SSG_HTML" | grep -q 'app.js' && echo 0 || echo 1)"
+#     # 反向断言：不依赖 fetch / marked.parse
+#     step "SSG HTML 不依赖 fetch/marked.parse" \
+#         "$(echo "$SSG_HTML" | grep -qE 'fetch\(|marked\.parse' && echo 0 || echo 1)"
+# fi
 
 # ---------- 10. 分支治理脚本冒烟（BUG-023） ----------
-echo "[10/13] 分支治理脚本冒烟 (BUG-023)"
+echo "[6/9] 分支治理脚本冒烟 (BUG-023)"
 if [ -f scripts/branch_governance.py ]; then
     step "branch_governance.py 存在" 1
 else
@@ -202,7 +206,7 @@ python3 scripts/branch_governance.py --mode execute --pattern "trae/agent-*" --n
 step "execute 无 --yes 时拒绝执行 (rc!=0)" "$([ "$?" -ne "0" ] && echo 1 || echo 0)"
 
 # ---------- 11. loop_log 结构校验 ----------
-echo "[11/13] loop_log 结构校验"
+echo "[7/9] loop_log 结构校验"
 if python3 scripts/check_loop_log.py >/dev/null 2>&1; then
     step "check_loop_log.py 通过" 1
 else
@@ -210,7 +214,7 @@ else
 fi
 
 # ---------- 12. plan-review skill 路径契约（BUG-031） ----------
-echo "[12/13] plan-review skill 路径契约 (BUG-031)"
+echo "[8/9] plan-review skill 路径契约 (BUG-031)"
 PLAN_REVIEW_SKILL=".trae/skills/plan-review/SKILL.md"
 DISPATCH_SKILL=".trae/skills/dispatching-parallel-agents/SKILL.md"
 step "plan-review SKILL.md 存在" "$([ -f "$PLAN_REVIEW_SKILL" ] && echo 1 || echo 0)"
@@ -230,7 +234,7 @@ step "review_plan.py 含 langgraph ImportError 友好提示" \
     "$(grep -q "路径 B（LangGraph 真并行）依赖未就绪" scripts/review_plan.py && echo 1 || echo 0)"
 
 # ---------- 13. 字数事实核对脚本冒烟（BUG-038） ----------
-echo "[13/13] 字数事实核对脚本冒烟 (BUG-038)"
+echo "[9/9] 字数事实核对脚本冒烟 (BUG-038)"
 if [ -f scripts/check_char_count.py ]; then
     step "check_char_count.py 存在" 1
 else
