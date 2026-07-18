@@ -56,13 +56,16 @@ collect_ignore = [
 
 @pytest.fixture
 def isolated_db(tmp_path, monkeypatch):
-    """src/server 单元测试专用：注入独立 SQLite 路径，避免污染 /workspace/data/wrongbook.db。
+    """src/server 单元测试专用：注入独立 SQLite 路径 + 输出目录，避免污染 /workspace/data/。
 
     用法：在测试函数签名加 `isolated_db` 参数即可，fixture 会自动：
     1. 创建 tmp_path/wrongbook.db
     2. monkeypatch KNOWTRACE_DB_PATH 环境变量
-    3. 同步重置 store.DB_PATH / wrongbook.MD_BACKUP_DIR / api.GRAPH_PATH 等模块常量
+    3. 同步重置 store.DB_PATH / wrongbook.MD_BACKUP_DIR / exam.OUTPUT_DIR / voice.VOICE_OUTPUT_DIR
     4. 调用 init_db() 初始化表结构
+
+    注意：本 fixture 不 patch diagnosis.GRAPH_PATH / retriever.QUESTION_BANK_PATH，
+    需要图谱/题库隔离的测试请额外用 graph_path / question_bank fixture。
     """
     db_path = tmp_path / "wrongbook.db"
     monkeypatch.setenv("KNOWTRACE_DB_PATH", str(db_path))
@@ -72,6 +75,11 @@ def isolated_db(tmp_path, monkeypatch):
     # 同步重置 wrongbook 的 MD_BACKUP_DIR（派生自 DB_PATH.parent）
     import src.server.services.wrongbook as wrongbook
     monkeypatch.setattr(wrongbook, "MD_BACKUP_DIR", db_path.parent / "wrongbook_md")
+    # 同步重置 exam / voice 输出目录（避免向真实 data/exam_output 写文件）
+    import src.server.services.exam as exam
+    monkeypatch.setattr(exam, "OUTPUT_DIR", tmp_path / "exam_output")
+    import src.server.services.voice as voice
+    monkeypatch.setattr(voice, "VOICE_OUTPUT_DIR", tmp_path / "voice_output")
     # 初始化表结构
     store.init_db(db_path)
     yield db_path

@@ -61,9 +61,9 @@ def test_diagnose_red_risk(isolated_db: Path, graph_path):
             error_type="减法变号错误",
         )
     result = diagnosis.diagnose_student("S001")
-    assert len(result.node_risks) == 1
-    risk = result.node_risks[0]
-    assert risk.knowledge_point_id == "K7A008"
+    # Phase 1 评审 P1-4：node_risks 现在包含全部图谱节点（含 gray 未做题），
+    # 需从 node_risks 中找出 K7A008 进行断言
+    risk = next(r for r in result.node_risks if r.knowledge_point_id == "K7A008")
     assert risk.risk_level == "red"
     assert risk.error_count == 4
     assert "减法变号错误" in risk.error_types
@@ -79,8 +79,9 @@ def test_diagnose_yellow_risk(isolated_db: Path, graph_path):
             problem_text="题面",
         )
     result = diagnosis.diagnose_student("S001")
-    assert result.node_risks[0].risk_level == "yellow"
-    assert result.node_risks[0].error_count == 3
+    risk = next(r for r in result.node_risks if r.knowledge_point_id == "K7A008")
+    assert risk.risk_level == "yellow"
+    assert risk.error_count == 3
     assert "K7A008" in result.weak_points
 
 
@@ -92,9 +93,28 @@ def test_diagnose_green_risk(isolated_db: Path, graph_path):
         problem_text="题面",
     )
     result = diagnosis.diagnose_student("S001")
-    assert result.node_risks[0].risk_level == "green"
-    assert result.node_risks[0].error_count == 1
+    risk = next(r for r in result.node_risks if r.knowledge_point_id == "K7A008")
+    assert risk.risk_level == "green"
+    assert risk.error_count == 1
     assert "K7A008" not in result.weak_points  # green 不算薄弱
+
+
+def test_diagnose_gray_risk_for_unattempted_kp(isolated_db: Path, graph_path):
+    """图谱中未做题的知识点评级为 gray（Phase 1 评审 P1-4：守护 gray 评级真实产出）"""
+    wrongbook.submit_wrong_problem(
+        student_id="S001",
+        knowledge_point_id="K7A008",  # 只做 K7A008
+        problem_text="题面",
+    )
+    result = diagnosis.diagnose_student("S001")
+    # K7A001 未做题，应为 gray
+    gray_risk = next(
+        (r for r in result.node_risks if r.knowledge_point_id == "K7A001"), None
+    )
+    assert gray_risk is not None, "K7A001 应出现在 node_risks 中（gray 评级）"
+    assert gray_risk.risk_level == "gray"
+    assert gray_risk.error_count == 0
+    assert "K7A001" not in result.weak_points  # gray 不算薄弱
 
 
 def test_diagnose_root_causes_depth_2(isolated_db: Path, graph_path):

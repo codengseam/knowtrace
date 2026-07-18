@@ -208,7 +208,7 @@ git rebase master
 ## 第 3 步：本地验证（必须全部通过）
 
 ```bash
-python scripts/check_book_structure.py --output output --strict
+python scripts/check_book_structure.py --output content --strict
 python scripts/check_missing_columns.py --strict
 python -m pytest tests/test_sorting.py tests/test_check_chapter_order.py tests/test_book_structure.py -q
 python scripts/build_site.py
@@ -221,7 +221,7 @@ python scripts/validate_commit_messages.py origin/master..HEAD
 
 `check_missing_columns.py --strict` 会扫描所有远程分支，找出「在某个 agent 分支生成但从未合入 master」的专栏。这是防止「专栏搞丢」的核心防线。
 
-- 检测到缺失时，脚本会输出找回命令（`git checkout <分支> -- "output/<专栏>"`）。
+- 检测到缺失时，脚本会输出找回命令（`git checkout <分支> -- "content/<专栏>"`）。
 - **必须先找回所有缺失专栏再 push/merge**，否则会覆盖 master 已有内容或让失踪专栏继续失踪。
 - 找回后重新跑 `check_book_structure.py --strict` 确认结构无误。
 
@@ -273,7 +273,7 @@ python scripts/validate_commit_messages.py origin/master..HEAD
 - 影响范围
 
 ## 验证结果
-- `python scripts/check_book_structure.py --output output --strict`：0 问题
+- `python scripts/check_book_structure.py --output content --strict`：0 问题
 - `pytest`：全部 passed
 - `python scripts/build_site.py`：成功
 - `python scripts/validate_commit_messages.py origin/master..HEAD`：通过
@@ -364,7 +364,7 @@ git push origin --delete <功能分支名>
 
 无论哪种模式，合并完成后都要在 master 上运行：
 ```bash
-python scripts/check_book_structure.py --output output --strict
+python scripts/check_book_structure.py --output content --strict
 python -m pytest tests/test_sorting.py tests/test_check_chapter_order.py tests/test_book_structure.py -q
 python scripts/validate_commit_messages.py origin/master~5..origin/master
 ```

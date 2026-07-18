@@ -15,19 +15,27 @@ from src.server import store
 
 @pytest.fixture
 def graph_path(tmp_path, monkeypatch):
-    """monkeypatch api.KNOWLEDGE_GRAPH_PATH 指向临时图谱 JSON"""
+    """monkeypatch api.KNOWLEDGE_GRAPH_PATH 与 diagnosis.GRAPH_PATH 指向同一临时图谱 JSON。
+
+    注意：handle_diagnosis_run → diagnose_student 读的是 diagnosis.GRAPH_PATH，
+    而 get_knowledge_points 读 api.KNOWLEDGE_GRAPH_PATH，两者必须同时 patch，
+    否则诊断链路会落到真实图谱文件导致隔离失效（Phase 1 评审 P0-1）。
+    """
     import json
+    from src.server.services import diagnosis
     graph_data = {
         "version": "1.0",
         "nodes": [
             {"id": "K7A001", "name": "正数与负数", "chapter": "第1章 有理数", "section": "1.1"},
-            {"id": "K7A008", "name": "有理数减法", "chapter": "第1章 有理数", "section": "1.3"},
+            {"id": "K7A008", "name": "有理数减法", "chapter": "第1章 有理数", "section": "1.3",
+             "prerequisites": ["K7A007", "K7A004"]},
         ],
         "edges": [],
     }
     graph_file = tmp_path / "test_graph.json"
     graph_file.write_text(json.dumps(graph_data, ensure_ascii=False), encoding="utf-8")
     monkeypatch.setattr(api, "KNOWLEDGE_GRAPH_PATH", graph_file)
+    monkeypatch.setattr(diagnosis, "GRAPH_PATH", graph_file)
     return graph_file
 
 
@@ -131,7 +139,7 @@ def test_handle_diagnosis_run_no_problems(isolated_db: Path, graph_path):
 
 
 def test_handle_diagnosis_run_with_red_risk(isolated_db: Path, graph_path):
-    """handle_diagnosis_run 错题 ≥4 道时显示 red 评级"""
+    """handle_diagnosis_run 错题 ≥4 道时显示 red 评级 + 前置溯源 + 推荐补漏路径"""
     for _ in range(4):
         api.handle_wrongbook_submit(
             student_id="S001",
@@ -146,6 +154,30 @@ def test_handle_diagnosis_run_with_red_risk(isolated_db: Path, graph_path):
     assert "🔴" in result  # red 标记
     assert "K7A008" in result
     assert "Phase 1 规则引擎" in result
+    # 守护图谱遍历在 api 层的集成（Phase 1 评审 P0-1：graph_path fixture 需同时 patch diagnosis.GRAPH_PATH）
+    # K7A008 的 prerequisites=[K7A007, K7A004]，应出现在「溯源前置薄弱点」段落
+    assert "溯源前置薄弱点" in result
+    assert "K7A007" in result
+    assert "K7A004" in result
+    # 推荐补漏路径：先补前置，再补薄弱
+    assert "推荐补漏路径" in result
+    assert "补前置" in result
+    assert "补薄弱" in result
+
+
+def test_handle_diagnosis_run_yellow_risk_shows_yellow_emoji(isolated_db: Path, graph_path):
+    """handle_diagnosis_run 错题 2-3 道时显示 🟡 yellow 评级"""
+    for _ in range(3):  # 3 道 = yellow 阈值
+        api.handle_wrongbook_submit(
+            student_id="S001",
+            knowledge_point_choice="K7A008 · 有理数减法（第1章 有理数）",
+            problem_text="题面",
+            error_type="减法变号错误",
+            student_answer="",
+            correct_answer="",
+        )
+    result = api.handle_diagnosis_run("S001")
+    assert "🟡" in result  # yellow 标记
 
 
 def test_handle_exam_generate_empty_kp(isolated_db: Path):

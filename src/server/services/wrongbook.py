@@ -10,14 +10,29 @@ from pathlib import Path
 
 from ..store import insert_wrong_problem, list_wrong_problems, DB_PATH
 
+# MD_BACKUP_DIR 保留为模块级常量供测试 rglob 查找用，
+# 但 _write_md_backup 内部不直接读它，而是用 _get_md_backup_dir() 动态派生，
+# 避免 import 时绑定 DB_PATH 导致 monkeypatch store.DB_PATH 后 MD 备份仍写旧目录
+# （Phase 1 评审 P1-3：默认参数陷阱的模块级常量变体）
 MD_BACKUP_DIR = DB_PATH.parent / "wrongbook_md"
 
 # 文件名 sanitize：仅允许字母数字下划线连字符，其余替换为下划线
 _SANITIZE_RE = re.compile(r"[^\w\-]", re.UNICODE)
 
 
+def _get_md_backup_dir() -> Path:
+    """动态计算 MD 备份目录（基于当前 store.DB_PATH）
+
+    每次调用时读取 store.DB_PATH，确保 monkeypatch store.DB_PATH 后 MD 备份目录跟着变。
+    """
+    from .. import store
+    return store.DB_PATH.parent / "wrongbook_md"
+
+
 def _sanitize_filename(value: str) -> str:
     """把字符串 sanitize 成文件名安全形式"""
+    if not value:
+        return "unknown"
     return _SANITIZE_RE.sub("_", value)
 
 
@@ -74,10 +89,11 @@ def _write_md_backup(
     文件名 sanitize：student_id 和 knowledge_point_id 都做安全处理，
     防止 ../ 或特殊字符导致异常路径（Phase 0 评审 R11 修复）。
     """
-    MD_BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+    md_backup_dir = _get_md_backup_dir()
+    md_backup_dir.mkdir(parents=True, exist_ok=True)
     safe_student = _sanitize_filename(student_id)
     safe_kp = _sanitize_filename(knowledge_point_id)
-    md_path = MD_BACKUP_DIR / safe_student / f"{problem_id:06d}_{safe_kp}.md"
+    md_path = md_backup_dir / safe_student / f"{problem_id:06d}_{safe_kp}.md"
     md_path.parent.mkdir(parents=True, exist_ok=True)
     content = f"""# 错题 #{problem_id}
 

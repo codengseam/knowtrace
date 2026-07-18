@@ -10,6 +10,7 @@
 
 ### 最近 20 条沉淀（按日期倒序）
 
+- [2026-07-18 Phase 1 错题录入与认知诊断真实闭环（2026-07-18，规则引擎四色风险 + 前置深度溯源 + 三视角评审 P0/P1 修复）#book_structure #deployment](loop_log/2026-07.md#loop-20260718-144721)
 - [2026-07-18 Phase 0 魔搭按钮可点与前后端分离架构基线（2026-07-18，Gradio 入口 + src/server 四层 + HaloRead 沿袭清理 + 三视角评审修复）#book_structure #deployment](loop_log/2026-07.md#loop-20260718-9e8097)
 - [2026-07-16 跨项目工程化资产迁移（2026-07-16，HaloRead → knowtrace 精选脚本 + 路径引用调整 + rules 项目名替换）#book_structure](loop_log/2026-07.md#loop-20260716-e86fa5)
 - [2026-07-16 专家团三视角并行审查与 P0/P1/P2 修复（2026-07-16，骨架完整性 + 阿里生态对接 + 知识图谱质量 三路并行审查）#book_structure](loop_log/2026-07.md#loop-20260716-74d525)
@@ -31,12 +32,12 @@
 | `#git_hygiene`（推送/合并/冲突/分支治理/commit 覆盖） | 0 | — |
 | `#reader_interaction`（阅读器/沉浸/翻页/吸底栏/SW 缓存） | 0 | — |
 | `#content_quality`（质检规则/灵魂注入/标题评分） | 0 | — |
-| `#book_structure`（排序/校验/命名/去重/双源同步） | 3 | — |
-| `#deployment`（GitHub Pages/魔搭/.nojekyll/SW） | 1 | — |
+| `#book_structure`（排序/校验/命名/去重/双源同步） | 4 | — |
+| `#deployment`（GitHub Pages/魔搭/.nojekyll/SW） | 2 | — |
 | `#soul_injection`（灵魂注入/章回体/总编Agent） | 0 | — |
 | `#ai_course`（专栏批量生成 / subagent 结果丢失） | 0 | — |
 
-> 共 3 条沉淀，按月份分片存储于 `docs/loop_log/`。
+> 共 4 条沉淀，按月份分片存储于 `docs/loop_log/`。
 
 <!-- AUTOGEN END: loop_log index -->
 

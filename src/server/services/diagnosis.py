@@ -55,18 +55,24 @@ def diagnose_student(student_id: str) -> DiagnosisResult:
             summary=f"学生 {student_id} 暂无错题记录，无法诊断。",
         )
 
-    # 按知识点聚合错题数 + 错因类型
+    # 按知识点聚合错题数 + 错因类型（去重保序，避免重复错因堆积）
     kp_count: dict[str, int] = Counter(p["knowledge_point_id"] for p in problems)
     kp_error_types: dict[str, list[str]] = {}
     for p in problems:
         kp = p["knowledge_point_id"]
-        if p.get("error_type"):
-            kp_error_types.setdefault(kp, []).append(p["error_type"])
+        et = p.get("error_type")
+        if et:
+            types_list = kp_error_types.setdefault(kp, [])
+            if et not in types_list:  # 去重保序
+                types_list.append(et)
 
-    # 四色风险评级：对所有错过的知识点评级
+    # 四色风险评级：对所有图谱节点 + 错过的知识点取并集评级
+    # （Phase 1 评审 P1-4 修复：原来只遍历 kp_count 会让 gray 评级永不产出）
+    all_kp_ids = set(nodes_by_id.keys()) | set(kp_count.keys())
     node_risks: list[NodeRisk] = []
     weak_points: list[str] = []  # red + yellow
-    for kp_id, count in kp_count.items():
+    for kp_id in all_kp_ids:
+        count = kp_count.get(kp_id, 0)
         node = nodes_by_id.get(kp_id, {})
         risk_level, risk_reason = _evaluate_risk(count)
         if risk_level in ("red", "yellow"):
@@ -84,7 +90,7 @@ def diagnose_student(student_id: str) -> DiagnosisResult:
         )
 
     # weak_points 按错题数降序
-    weak_points.sort(key=lambda k: kp_count[k], reverse=True)
+    weak_points.sort(key=lambda k: kp_count.get(k, 0), reverse=True)
 
     # 前置深度溯源（递归查 PREREQUISITE_DEPTH 层）
     root_causes = _find_root_causes_deep(weak_points, nodes_by_id, depth=PREREQUISITE_DEPTH)
@@ -121,11 +127,19 @@ def _evaluate_risk(error_count: int) -> tuple[str, str]:
 
 
 def _load_graph() -> dict[str, Any]:
-    """加载知识图谱 JSON，缺失时返回空图谱（不阻断诊断）"""
+    """加载知识图谱 JSON，缺失或损坏时返回空图谱（不阻断诊断）
+
+    Phase 1 评审 P1-1 修复：原实现只判 exists()，未捕获 JSONDecodeError，
+    图谱文件损坏时会让 diagnose_student 抛异常导致 Gradio Tab 崩溃。
+    """
     if not GRAPH_PATH.exists():
         return {"nodes": [], "edges": []}
-    with GRAPH_PATH.open(encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        with GRAPH_PATH.open(encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        # 图谱 JSON 损坏或读取失败时降级为空图谱，不阻断诊断
+        return {"nodes": [], "edges": []}
 
 
 def _find_root_causes_deep(

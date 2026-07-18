@@ -44,7 +44,7 @@ version: 1.0.0
 | 层 | 内容 | 工具 |
 |---|---|---|
 | 单元层 | 改动直接相关的测试 | `pytest tests/test_xxx.py -q` |
-| 集成层 | 项目级校验脚本 | `python scripts/check_book_structure.py --output output --strict` |
+| 集成层 | 项目级校验脚本 | `python scripts/check_book_structure.py --output content --strict` |
 | 端到端层 | 构建产物 + 回归集 | `python scripts/build_site.py` + `bash tests/run_regression_suite.sh` |
 
 ## 4. 失败必须停下来，不能"先提交再说"
@@ -73,7 +73,7 @@ version: 1.0.0
 
 | 声明 | 验证手段 |
 |---|---|
-| 改写 41 篇小标题 | `ls output/明纪/*.md \| wc -l` 应为 42（41+1 已提交的）|
+| 改写 41 篇小标题 | `ls content/<专栏>/*.md \| wc -l` 应为 42（41+1 已提交的）|
 | 新增校验函数 | `pytest tests/test_quality.py` 应通过 |
 | 校验通过 | `check_book_structure.py --strict` 应 0 问题 |
 

@@ -105,12 +105,37 @@ def test_list_respects_limit(isolated_db: Path):
 
 
 def test_wal_mode_enabled(isolated_db: Path):
-    """init_db 启用 WAL 模式（Phase 0 评审 P1 R4 修复）"""
+    """init_db 启用 WAL 模式（Phase 0 评审 P1 R4 修复）
+
+    Phase 1 评审 P1-3 修复：原断言 `mode in ("wal", "memory", "delete")`
+    覆盖几乎所有可能取值，等价于 `assert mode is not None`，WAL 未启用也不会失败。
+    改为强断言 wal，tmpfs 环境降级时显式 skip 而非弱断言放水。
+    """
     store.init_db(isolated_db)
     with store.get_conn(isolated_db) as conn:
         mode = conn.execute("PRAGMA journal_mode").fetchone()[0]
-    # WAL 在某些文件系统（如 tmpfs）可能降级为 memory，不强制要求 wal
-    assert mode in ("wal", "memory", "delete"), f"journal_mode={mode} 不在预期范围"
+    # tmpfs / 只读挂载等环境 SQLite 会降级为 memory 或 delete，此时显式 skip
+    if mode != "wal":
+        pytest.skip(f"当前文件系统不支持 WAL，journal_mode={mode}（tmpfs/只读挂载降级，非 bug）")
+    assert mode == "wal"
+
+
+def test_default_db_path_resolved_at_call_time(isolated_db: Path, monkeypatch):
+    """守护 Python 默认参数陷阱（Phase 1 评审 P1-6）
+
+    store.py 所有函数默认参数改为 `db_path: Path | None = None`，函数体内读模块级 DB_PATH。
+    本测试显式守护：monkeypatch store.DB_PATH 后，不传 db_path 调用 insert/list 应使用新路径。
+    未来若有人"优化"回 `db_path: Path = DB_PATH`（定义时绑定），此测试会失败。
+    """
+    # isolated_db fixture 已 monkeypatch store.DB_PATH = isolated_db 并 init_db
+    # 不传 db_path，依赖默认参数走模块级 DB_PATH
+    pid = store.insert_wrong_problem(
+        student_id="S999", knowledge_point_id="K7A001", problem_text="守护默认参数陷阱",
+    )
+    assert pid > 0
+    rows = store.list_wrong_problems(student_id="S999")
+    assert len(rows) == 1
+    assert rows[0]["problem_text"] == "守护默认参数陷阱"
 
 
 def test_concurrent_inserts_no_deadlock(isolated_db: Path):
