@@ -1,5 +1,10 @@
 name: Deploy to ModelScope Studio
 
+# 合并到 master 后自动同步本仓库到魔搭 ModelScope Studio。
+# 当前阶段：纯 git 同步（不跑静态站点构建），因为 knowtrace 还在 MVP 骨架阶段，
+# src/utils/sorting.py 和 src/web/static-site/ 尚未从 HaloRead 迁移过来，
+# build_site.py 暂时跑不通。等 MVP 前端就绪后再恢复构建步骤。
+
 on:
   push:
     branches:
@@ -11,133 +16,99 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  sync-to-modelscope:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          cache: pip
+          fetch-depth: 0
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Build static site
-        run: python scripts/build_site.py --output output --site site
-
-      - name: Verify build output
-        run: |
-          set -e
-          # 校验关键文件存在
-          for f in index.html css/style.css js/app.js data/index.json; do
-            if [ ! -f "site/$f" ]; then
-              echo "::error::缺失构建产物 site/$f"
-              exit 1
-            fi
-          done
-          # 校验 notes 目录非空
-          if [ -z "$(ls -A site/notes 2>/dev/null)" ]; then
-            echo "::error::site/notes 目录为空"
-            exit 1
-          fi
-          # 校验 index.json 可解析
-          if ! python -c "import json; json.load(open('site/data/index.json'))" 2>/dev/null; then
-            echo "::error::site/data/index.json 不是有效的 JSON"
-            exit 1
-          fi
-          echo "✅ 构建产物校验通过"
-          echo "笔记数量: $(python -c "import json; print(json.load(open('site/data/index.json'))['stats']['notes'])")"
-
-      - name: Push to ModelScope Studio
+      - name: Diagnose secrets
         env:
           MS_TOKEN: ${{ secrets.MODELSCOPE_API_TOKEN }}
-          MS_REPO: ${{ vars.MODELSCOPE_STUDIO_REPO }}
         run: |
-          set -e
-
-          # ---- 诊断：检查环境变量是否已配置 ----
           if [ -z "$MS_TOKEN" ]; then
-            echo "::error::MODELSCOPE_API_TOKEN 未配置。请前往 GitHub Settings → Secrets → Actions 添加。"
+            echo "::error::MODELSCOPE_API_TOKEN 未配置。请前往 GitHub Settings → Secrets and variables → Actions → New repository secret 添加：Name=MODELSCOPE_API_TOKEN, Value=魔搭个人中心的访问令牌。"
             exit 1
           fi
           echo "✅ MODELSCOPE_API_TOKEN 已配置"
 
-          if [ -z "$MS_REPO" ]; then
-            echo "::error::MODELSCOPE_STUDIO_REPO 未配置。请前往 GitHub Settings → Variables → Actions 添加。"
-            exit 1
-          fi
-          echo "✅ MODELSCOPE_STUDIO_REPO = $MS_REPO"
+      - name: Push to ModelScope Studio (knowtrace)
+        env:
+          MS_TOKEN: ${{ secrets.MODELSCOPE_API_TOKEN }}
+        run: |
+          set -e
 
-          # ---- 同步到魔搭创空间（保留远端历史，用本地构建产物覆盖）----
-          # 策略：在临时目录 clone 远端 → 覆盖构建产物 → commit → push
-          # 这样既保留远端 commit 历史（含 README.md 卡片等），又确保构建产物最新
+          # 魔搭目标仓库（硬编码，避免 Variable 未配置导致部署失败）
+          MS_REPO="https://www.modelscope.cn/studios/codengseam/knowtrace.git"
+          AUTH_REPO=$(echo "$MS_REPO" | sed "s|https://|https://oauth2:${MS_TOKEN}@|")
 
-          # 把构建产物暂存到临时目录（在 git 操作之前）
-          STAGING_DIR=$(mktemp -d)
-          cp -r site/. "$STAGING_DIR/"
-          echo "✅ 构建产物已暂存到 $STAGING_DIR"
-
-          # 在全新的临时目录操作 git，避免工作区文件冲突
+          # 在临时目录操作远端仓库，避免污染 GitHub Actions 工作区
           WORK_DIR=$(mktemp -d)
           cd "$WORK_DIR"
 
           git init -b master
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # 用 token 配置认证
-          AUTH_REPO=$(echo "$MS_REPO" | sed "s|https://|https://oauth2:${MS_TOKEN}@|")
           git remote add modelscope "$AUTH_REPO"
 
+          # 拉取远端 master（若存在）；首次部署到空仓库时跳过
           if git fetch modelscope master 2>&1; then
-            echo "✅ 已拉取远端 master 分支，基于远端历史部署"
-            # 工作区是空的，checkout 不会冲突
+            echo "✅ 已拉取远端 master 分支，基于远端历史增量同步"
             git checkout -b deploy modelscope/master
-            # 远端独有文件（如 README.md 卡片）现在在工作区
           else
-            echo "ℹ️ 远端 master 分支不存在（首次部署）"
+            echo "ℹ️ 远端 master 不存在（首次部署到空仓库），将创建新分支"
             git checkout -b deploy
           fi
 
-          # 用暂存的构建产物覆盖工作区（保留远端独有文件，覆盖同名文件）
-          cp -rf "$STAGING_DIR"/. .
-          rm -rf "$STAGING_DIR"
+          # 用当前仓库的完整内容覆盖临时目录（保留远端独有文件如 README.md 卡片，覆盖同名文件）
+          # 排除 .git 自身
+          rsync -a --delete \
+            --exclude='.git' \
+            "$GITHUB_WORKSPACE"/. .
 
-          # 添加所有变更并提交
+          # 提交变更（允许空提交，方便手动触发重跑部署）
           git add -A
           git commit -m "deploy: sync from GitHub ${{ github.sha }}" --allow-empty || echo "无变更需要提交"
 
-          # 推送到魔搭 master 分支（fast-forward，保留远端历史）
+          # 推送到魔搭 master 分支
           if git push "$AUTH_REPO" deploy:master 2>&1; then
-            echo "✅ 已推送到 master 分支"
+            echo "✅ 已推送到魔搭 master 分支"
           else
             echo "::error::推送到魔搭仓库失败，请检查 Token 权限和仓库地址。"
             exit 1
           fi
 
-          # 清理工作目录
+          # 清理
           cd "$GITHUB_WORKSPACE"
           rm -rf "$WORK_DIR"
 
-          echo "✅ Deployed to ModelScope Studio"
+          echo "✅ Deployed to ModelScope Studio (knowtrace)"
 
       - name: Job Summary
         if: always()
         run: |
-          echo "## 🚀 魔搭 Studio 部署结果" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚀 魔搭 Studio 部署结果（knowtrace）" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **目标**: ModelScope Studio" >> $GITHUB_STEP_SUMMARY
-          echo "- **仓库**: \`${{ vars.MODELSCOPE_STUDIO_REPO }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **访问地址**: https://www.modelscope.cn/studios/codengseam/haosz" >> $GITHUB_STEP_SUMMARY
+          echo "- **目标仓库**: https://www.modelscope.cn/studios/codengseam/knowtrace.git" >> $GITHUB_STEP_SUMMARY
+          echo "- **访问地址**: https://www.modelscope.cn/studios/codengseam/knowtrace" >> $GITHUB_STEP_SUMMARY
           echo "- **触发 commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- **状态**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ "${{ job.status }}" = "success" ]; then
-            echo "✅ 部署成功！魔搭空间内容已更新。" >> $GITHUB_STEP_SUMMARY
+            echo "✅ 部署成功！魔搭 knowtrace 仓库内容已与 GitHub master 同步。" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 📌 后续操作" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "1. 首次部署后，请前往魔搭仓库页面确认内容已同步。" >> $GITHUB_STEP_SUMMARY
+            echo "2. 部署使用的 Token 已在 GitHub Secret 中保存，请勿在代码或对话中明文出现。" >> $GITHUB_STEP_SUMMARY
+            echo "3. 等 knowtrace MVP 前端就绪后，恢复 workflow 中的 build_site.py 构建步骤。" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ 部署失败，请查看上方日志排查。" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 常见失败原因" >> $GITHUB_STEP_SUMMARY
+            echo "- \`MODELSCOPE_API_TOKEN\` 未配置或已过期 → 前往 GitHub Settings → Secrets → Actions 重新设置" >> $GITHUB_STEP_SUMMARY
+            echo "- Token 权限不足 → 在魔搭个人中心确认 Token 有 \`studio\` 写权限" >> $GITHUB_STEP_SUMMARY
+            echo "- 远端仓库地址变更 → 修改本 workflow 中 \`MS_REPO=\` 这一行" >> $GITHUB_STEP_SUMMARY
           fi
